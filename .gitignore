@@ -1,8 +1,9 @@
+# Created by https://www.gitignore.io/api/unrealengine
+# Edit at https://www.gitignore.io/?templates=unrealengine
+
+### UnrealEngine ###
 # Visual Studio 2015 user specific files
 .vs/
-
-# Visual Studio 2015 database file
-*.VC.db
 
 # Compiled Object files
 *.slo
@@ -75,3 +76,5 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# End of https://www.gitignore.io/api/unrealengine
