@@ -13,13 +13,19 @@ class AGEOFSURVIVAL_API ACPPGameStateBase : public AGameStateBase
 	GENERATED_BODY()
 	
 public:
+	//Constructor
 	ACPPGameStateBase();
+	//Arrays for time data and date data
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	TArray<int32> GameTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	TArray<int32> GameDate;
+	//Game speed multiplier 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	float GameSpeedMultiplier;
+	//Boolean for knowing whether is night or not, useful for things that are time locked.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
+	bool bIsNight;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resources")
 	//int32 Currency
@@ -28,11 +34,11 @@ public:
 	//int32 ChangeCurrency(int32 amount);
 
 protected:
+	//Base functions
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
-
 	// Clock Functions
 	void SetClockwork(float DeltaSeconds);
 	void Clock();

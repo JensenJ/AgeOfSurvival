@@ -14,5 +14,6 @@ class AGEOFSURVIVAL_API ACPPGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 private:
+	//Constructor for setting defaults
 	ACPPGameModeBase();
 };

@@ -6,6 +6,7 @@
 #include "CPPPlayerController.h"
 #include "CPPPlayerState.h"
 
+//Set default classes
 ACPPGameModeBase::ACPPGameModeBase() {
 	PlayerControllerClass = ACPPPlayerController::StaticClass();
 	DefaultPawnClass = ACPPCameraPawn::StaticClass();
