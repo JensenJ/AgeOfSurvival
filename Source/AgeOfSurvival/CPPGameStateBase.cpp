@@ -36,7 +36,12 @@ void ACPPGameStateBase::Tick(float DeltaSeconds) {
 	SetClockwork(DeltaSeconds);
 	Clock();
 	Calendar();
-	DayNight();
+	EnvironmentTick(); //Updates all environment based stuff (day/night, cloud speed, opacity, etc)
+}
+
+void ACPPGameStateBase::EnvironmentTick() {
+	FRotator SunAngle = DayNight();
+	UpdateEnvironment(SunAngle); //Blueprint Function
 }
 
 //Sets clockwork for working out game speed.
@@ -76,14 +81,6 @@ void ACPPGameStateBase::Clock() {
 	GameTime.Insert(Minutes, 1);
 	GameTime.Insert(Hours, 2);
 
-	//Day-Night Toggle
-	if (Hours >= 17 || Hours <= 5) {
-		bIsNight = true;
-	}
-	else {
-		bIsNight = false;
-	}
-
 	//Logs time and whether day or night
 	FString strHours = FString::FromInt(GameTime[2]);
 	FString HoursMinutesString = UKismetStringLibrary::BuildString_Int(strHours, ":", GameTime[1], "");
@@ -92,10 +89,19 @@ void ACPPGameStateBase::Clock() {
 	UE_LOG(LogTemp, Warning, TEXT("Night: %s"), (bIsNight ? TEXT("True") : TEXT("False")));
 }
 //Calculates SunAngle and pushes to blueprint event
-void ACPPGameStateBase::DayNight() {
+FRotator ACPPGameStateBase::DayNight() {
 	float SunAngle = ((DayNightHours / 6) * 90) + 90;
-	FRotator SunRot = UKismetMathLibrary::MakeRotator(0, SunAngle, 0);
-	UpdateDayNight(SunRot); //Blueprint Function
+	FRotator SunRot = UKismetMathLibrary::MakeRotator(0, SunAngle, 90);
+
+	//Day-Night Toggle
+	if (Hours >= 17 || Hours <= 5) {
+		bIsNight = true;
+	}
+	else {
+		bIsNight = false;
+	}
+
+	return SunRot;
 }
 
 //Calculates date

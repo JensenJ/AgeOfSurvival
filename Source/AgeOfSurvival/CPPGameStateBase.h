@@ -28,7 +28,7 @@ public:
 	bool bIsNight;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
-	void UpdateDayNight(FRotator SunAngle);
+	void UpdateEnvironment(FRotator SunAngle);
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resources")
 	//int32 Currency
@@ -46,7 +46,7 @@ private:
 	void SetClockwork(float DeltaSeconds);
 	void Clock();
 	void Calendar();
-	void DayNight();
+
 	// Clock Variables
 	float TimeUnit = 0.25f;
 	float Clockwork = 0.0f;
@@ -58,7 +58,11 @@ private:
 	int32 Month = 1;
 	int32 Year = 1;
 
-	//Day Night Variables
+	//Environment Functions
+	void EnvironmentTick();
+	FRotator DayNight();
+
+	//Environment Variables
 	float DayNightHours = 0;
 
 
