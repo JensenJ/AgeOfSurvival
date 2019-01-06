@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	bool bIsNight;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
+	void UpdateDayNight(FRotator SunAngle);
+
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resources")
 	//int32 Currency
 
@@ -43,6 +46,7 @@ private:
 	void SetClockwork(float DeltaSeconds);
 	void Clock();
 	void Calendar();
+	void DayNight();
 	// Clock Variables
 	float TimeUnit = 0.25f;
 	float Clockwork = 0.0f;
@@ -53,6 +57,9 @@ private:
 	int32 Day = 1;
 	int32 Month = 1;
 	int32 Year = 1;
+
+	//Day Night Variables
+	float DayNightHours = 0;
 
 
 };

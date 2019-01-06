@@ -6,6 +6,7 @@
 #include "Kismet/KismetStringLibrary.h"
 #include "GameFramework/Actor.h"
 #include "GenericPlatform/GenericPlatformMath.h"
+#include "UObject/ConstructorHelpers.h"
 
 ACPPGameStateBase::ACPPGameStateBase() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -35,6 +36,7 @@ void ACPPGameStateBase::Tick(float DeltaSeconds) {
 	SetClockwork(DeltaSeconds);
 	Clock();
 	Calendar();
+	DayNight();
 }
 
 //Sets clockwork for working out game speed.
@@ -65,9 +67,9 @@ void ACPPGameStateBase::Clock() {
 
 	// Hours
 	float NewHours = NewMinutes / 60;
-	float RemainderHours = FGenericPlatformMath::Fmod(NewHours, 60.0f);
-	UKismetMathLibrary::FFloor(RemainderHours);
-	Hours = RemainderHours;
+	DayNightHours = FGenericPlatformMath::Fmod(NewHours, 60.0f);
+	UKismetMathLibrary::FFloor(DayNightHours);
+	Hours = DayNightHours;
 
 	//Sets game time variables into array
 	GameTime.Insert(Seconds, 0);
@@ -89,6 +91,13 @@ void ACPPGameStateBase::Clock() {
 	UE_LOG(LogTemp, Warning, TEXT("PEGameStateBase: Time: %s"), *FinalString);
 	UE_LOG(LogTemp, Warning, TEXT("Night: %s"), (bIsNight ? TEXT("True") : TEXT("False")));
 }
+//Calculates SunAngle and pushes to blueprint event
+void ACPPGameStateBase::DayNight() {
+	float SunAngle = ((DayNightHours / 6) * 90) + 90;
+	FRotator SunRot = UKismetMathLibrary::MakeRotator(0, SunAngle, 0);
+	UpdateDayNight(SunRot); //Blueprint Function
+}
+
 //Calculates date
 void ACPPGameStateBase::Calendar() {
 	Day = DayTick + Day;
