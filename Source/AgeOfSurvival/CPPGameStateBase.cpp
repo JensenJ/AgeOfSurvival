@@ -161,6 +161,7 @@ float ACPPGameStateBase::Temperature() {
 				MinGenTemp = -7.0f * TempMultiplier;
 			}
 			else if (SeasonEnum == ESeasonEnum::ESpring) {
+				MaxGenTemp = 12.0f * TempMultiplier;
 				MinGenTemp = 2.0f * TempMultiplier;
 			}
 			else if (SeasonEnum == ESeasonEnum::ESummer) {
