@@ -7,6 +7,15 @@
 #include "CPPPlayerController.h"
 #include "CPPGameStateBase.generated.h"
 
+UENUM(BlueprintType)
+enum class ESeasonEnum : uint8 {
+	ENone		UMETA(DisplayName = "None"),
+	ESpring		UMETA(DisplayName = "Spring"),
+	ESummer		UMETA(DisplayName = "Summer"),
+	EAutumn		UMETA(DisplayName = "Autumn"),
+	EWinter		UMETA(DisplayName = "Winter")
+};
+
 UCLASS()
 class AGEOFSURVIVAL_API ACPPGameStateBase : public AGameStateBase
 {
@@ -22,13 +31,16 @@ public:
 	TArray<int32> GameDate;
 	//Game speed multiplier 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
-	float GameSpeedMultiplier;
+	float GameSpeedMultiplier = 1.0f;
 	//Boolean for knowing whether is night or not, useful for things that are time locked.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	bool bIsNight;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
-	void UpdateDayNight(FRotator SunAngle);
+	void UpdateEnvironment(FRotator SunAngle, ESeasonEnum Season);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	ESeasonEnum SeasonEnum;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resources")
 	//int32 Currency
@@ -46,7 +58,7 @@ private:
 	void SetClockwork(float DeltaSeconds);
 	void Clock();
 	void Calendar();
-	void DayNight();
+
 	// Clock Variables
 	float TimeUnit = 0.25f;
 	float Clockwork = 0.0f;
@@ -58,7 +70,12 @@ private:
 	int32 Month = 1;
 	int32 Year = 1;
 
-	//Day Night Variables
+	//Environment Functions
+	void EnvironmentTick();
+	ESeasonEnum Season(int32 Month);
+	FRotator DayNight();
+
+	//Environment Variables
 	float DayNightHours = 0;
 
 

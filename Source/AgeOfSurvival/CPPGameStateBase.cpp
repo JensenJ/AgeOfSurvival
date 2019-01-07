@@ -36,13 +36,19 @@ void ACPPGameStateBase::Tick(float DeltaSeconds) {
 	SetClockwork(DeltaSeconds);
 	Clock();
 	Calendar();
-	DayNight();
+	EnvironmentTick(); //Updates all environment based stuff (day/night, cloud speed, opacity, etc)
+}
+
+void ACPPGameStateBase::EnvironmentTick() {
+	SeasonEnum = Season(Month);
+	FRotator SunAngle = DayNight();
+	UpdateEnvironment(SunAngle, SeasonEnum); //Blueprint Function
 }
 
 //Sets clockwork for working out game speed.
 void ACPPGameStateBase::SetClockwork(float DeltaSeconds) {
 	//Works out game speed
-	float DeltaTimeUnit = DeltaSeconds / TimeUnit * GameSpeedMultiplier; 
+	float DeltaTimeUnit = (DeltaSeconds / TimeUnit * 0.24) * GameSpeedMultiplier; 
 	float AddedClockwork = DeltaTimeUnit + Clockwork;
 	float NewDayTick = AddedClockwork / (60 * 24);
 	float Remainder = FGenericPlatformMath::Fmod(AddedClockwork, (60.0f * 24.0f));
@@ -76,6 +82,38 @@ void ACPPGameStateBase::Clock() {
 	GameTime.Insert(Minutes, 1);
 	GameTime.Insert(Hours, 2);
 
+	//Logs time and whether day or night
+	FString strHours = FString::FromInt(GameTime[2]);
+	FString HoursMinutesString = UKismetStringLibrary::BuildString_Int(strHours, ":", GameTime[1], "");
+	FString FinalString = UKismetStringLibrary::BuildString_Int(HoursMinutesString, ":", GameTime[0], "");
+	UE_LOG(LogTemp, Warning, TEXT("PEGameStateBase: Time: %s"), *FinalString);
+	UE_LOG(LogTemp, Warning, TEXT("Night: %s"), (bIsNight ? TEXT("True") : TEXT("False")));
+}
+
+//Returns the season based on what month it is
+ESeasonEnum ACPPGameStateBase::Season(int32 Month) {
+	if (Month == 12 || Month == 1 || Month == 2) {
+		return ESeasonEnum::EWinter;
+	}
+	else if (Month == 3 || Month == 4 || Month == 5) {
+		return ESeasonEnum::ESpring;
+	}
+	else if (Month == 6 || Month == 7 || Month == 8) {
+		return ESeasonEnum::ESummer;
+	}
+	else if (Month == 9 || Month == 10 || Month == 11) {
+		return ESeasonEnum::EAutumn;
+	}
+	else {
+		return ESeasonEnum::ENone;
+	}
+}
+
+//Calculates SunAngle and returns to environment tick
+FRotator ACPPGameStateBase::DayNight() {
+	float SunAngle = ((DayNightHours / 6) * 90) + 90;
+	FRotator SunRot = UKismetMathLibrary::MakeRotator(0, SunAngle, 90);
+
 	//Day-Night Toggle
 	if (Hours >= 17 || Hours <= 5) {
 		bIsNight = true;
@@ -84,18 +122,7 @@ void ACPPGameStateBase::Clock() {
 		bIsNight = false;
 	}
 
-	//Logs time and whether day or night
-	FString strHours = FString::FromInt(GameTime[2]);
-	FString HoursMinutesString = UKismetStringLibrary::BuildString_Int(strHours, ":", GameTime[1], "");
-	FString FinalString = UKismetStringLibrary::BuildString_Int(HoursMinutesString, ":", GameTime[0], "");
-	UE_LOG(LogTemp, Warning, TEXT("PEGameStateBase: Time: %s"), *FinalString);
-	UE_LOG(LogTemp, Warning, TEXT("Night: %s"), (bIsNight ? TEXT("True") : TEXT("False")));
-}
-//Calculates SunAngle and pushes to blueprint event
-void ACPPGameStateBase::DayNight() {
-	float SunAngle = ((DayNightHours / 6) * 90) + 90;
-	FRotator SunRot = UKismetMathLibrary::MakeRotator(0, SunAngle, 0);
-	UpdateDayNight(SunRot); //Blueprint Function
+	return SunRot;
 }
 
 //Calculates date
