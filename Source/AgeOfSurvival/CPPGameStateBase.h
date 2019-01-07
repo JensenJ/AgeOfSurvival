@@ -37,10 +37,16 @@ public:
 	bool bIsNight;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
-	void UpdateEnvironment(FRotator SunAngle, ESeasonEnum Season);
+	void UpdateEnvironment(FRotator SunAngle, ESeasonEnum Season, float Temperature);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	ESeasonEnum SeasonEnum;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float Temp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float TempMultiplier = 1.0f;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resources")
 	//int32 Currency
@@ -74,9 +80,17 @@ private:
 	void EnvironmentTick();
 	ESeasonEnum Season(int32 Month);
 	FRotator DayNight();
+	float Temperature();
 
 	//Environment Variables
 	float DayNightHours = 0;
+
+	//Temperature
+	float GeneratedTemp = 5.0f;
+	float LastTemp;
+	float MinGenTemp;
+	float MaxGenTemp;
+	bool bHasGeneratedTemp = false;
 
 
 };
