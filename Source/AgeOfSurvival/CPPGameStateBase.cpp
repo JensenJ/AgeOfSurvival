@@ -40,7 +40,7 @@ void ACPPGameStateBase::Tick(float DeltaSeconds) {
 	Calendar();
 	EnvironmentTick(); //Updates all environment based stuff (day/night, cloud speed, opacity, etc)
 }
-
+//Ticks through and updates functions related to environment
 void ACPPGameStateBase::EnvironmentTick() {
 	SeasonEnum = Season(Month);
 	FRotator SunAngle = DayNight();
@@ -93,8 +93,8 @@ void ACPPGameStateBase::Clock() {
 	UE_LOG(LogTemp, Warning, TEXT("PEGameStateBase: Time: %s"), *FinalString);
 	UE_LOG(LogTemp, Warning, TEXT("Night: %s"), (bIsNight ? TEXT("True") : TEXT("False")));
 }
-//Calculates date
 
+//Calculates date
 void ACPPGameStateBase::Calendar() {
 	Day = DayTick + Day;
 	int32 DaysInMonth = UKismetMathLibrary::DaysInMonth(Year, Month);
@@ -153,8 +153,10 @@ FRotator ACPPGameStateBase::DayNight() {
 
 	return SunRot;
 }
-
+//Generates temperature for this hour.
 float ACPPGameStateBase::Temperature() {
+
+	//TODO Add functionality for wind to affect temperature.
 
 	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
 		if (!bHasGeneratedTemp) {
@@ -203,11 +205,12 @@ float ACPPGameStateBase::Temperature() {
 				GameTemp.Insert(GeneratedTemp, i);
 			}
 
-			//Calculating Mean
+			//Calculating Mean Temperature
 			AverageTemp = (GameTemp[0] + GameTemp[1] + GameTemp[2]) / 3;
 
-			LastTemp = AverageTemp;
+			LastTemp = AverageTemp; //Setting last temp for next hour.
 
+			//Converting celsius to fahrenheit if user has option enabled.
 			if (bIsTempFahrenheit) {
 				AverageTemp = (AverageTemp * (9 / 5)) + 32;
 			}
@@ -224,24 +227,31 @@ float ACPPGameStateBase::Temperature() {
 }
 //Function to return string version of temperature for display.
 FString ACPPGameStateBase::TemperatureString() {
+	//Converts float to string
 	FString StringTemp = FString::SanitizeFloat(TempFloat);
 
+	//Finds decimal point index
 	int32 DecimalPos = UKismetStringLibrary::FindSubstring(StringTemp, ".", false, false, 0);
+	//Gets all numbers after decimal
 	FString DecimalString = UKismetStringLibrary::GetSubstring(StringTemp, DecimalPos, 2);
+	//Gets everything before decimal
 	FString NumberString = UKismetStringLibrary::LeftChop(StringTemp, StringTemp.Len() - DecimalPos);
 
 	//UE_LOG(LogTemp, Warning, TEXT("Temp: %f"), TempFloat);
 	//UE_LOG(LogTemp, Warning, TEXT("Temp: %s%s"), *NumberString, *DecimalString);
 
+	//Merges before and after decimal together
 	FString FinalString = NumberString.Append(DecimalString);
 
+	//Adds temperature unit
 	if (bIsTempFahrenheit) {
 		FinalString.Append(TEXT("°F"));
 	}
 	else {
 		FinalString.Append(TEXT("°C"));
 	}
-	return FinalString;
+
+	return FinalString; //Returns string out of function.
 
 	//TODO create functionality for less accurate reading of temperatures during primitive age.
 }
