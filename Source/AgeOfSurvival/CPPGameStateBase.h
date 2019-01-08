@@ -7,6 +7,8 @@
 #include "CPPPlayerController.h"
 #include "CPPGameStateBase.generated.h"
 
+
+//Enum for different seasons.
 UENUM(BlueprintType)
 enum class ESeasonEnum : uint8 {
 	ENone		UMETA(DisplayName = "None"),
@@ -32,19 +34,34 @@ public:
 	//Game speed multiplier 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	float GameSpeedMultiplier = 1.0f;
-	//Boolean for knowing whether is night or not, useful for things that are time locked.
+
+	//Environment
+
+	//Boolean for day/night
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	bool bIsNight;
 
+	//Update function for blueprint (visual stuff, e.g. sun position)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
-	void UpdateEnvironment(FRotator SunAngle, ESeasonEnum Season, float Temperature);
+	void UpdateEnvironment(FRotator SunAngle, ESeasonEnum Season, const FString& Temperature);
 
+	//Currently selected season
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	ESeasonEnum SeasonEnum;
 
+	//Boolean for temperature unit.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
-	float Temp;
+	bool bIsTempFahrenheit;
 
+	//Temperature variable for calculations.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float TempFloat;
+
+	//Temperature variable for display to the user.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	FString TempString;
+
+	//Temperature multiplier for base generated temp, lower is colder, higher is hotter.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float TempMultiplier = 1.0f;
 
@@ -81,15 +98,18 @@ private:
 	ESeasonEnum Season(int32 Month);
 	FRotator DayNight();
 	float Temperature();
+	FString TemperatureString();
 
 	//Environment Variables
 	float DayNightHours = 0;
 
 	//Temperature
+	TArray<float> GameTemp;
 	float GeneratedTemp = 5.0f;
 	float LastTemp;
 	float MinGenTemp;
 	float MaxGenTemp;
+	float AverageTemp;
 	bool bHasGeneratedTemp = false;
 
 
