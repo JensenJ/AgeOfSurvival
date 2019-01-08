@@ -32,18 +32,26 @@ public:
 	//Game speed multiplier 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	float GameSpeedMultiplier = 1.0f;
-	//Boolean for knowing whether is night or not, useful for things that are time locked.
+
+	//Environment
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	bool bIsNight;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
-	void UpdateEnvironment(FRotator SunAngle, ESeasonEnum Season, float Temperature);
+	void UpdateEnvironment(FRotator SunAngle, ESeasonEnum Season, const FString& Temperature);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	ESeasonEnum SeasonEnum;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
-	float Temp;
+	bool bIsTempFahrenheit;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float TempFloat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	FString TempString;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float TempMultiplier = 1.0f;
@@ -81,15 +89,18 @@ private:
 	ESeasonEnum Season(int32 Month);
 	FRotator DayNight();
 	float Temperature();
+	FString TemperatureString();
 
 	//Environment Variables
 	float DayNightHours = 0;
 
 	//Temperature
+	TArray<float> GameTemp;
 	float GeneratedTemp = 5.0f;
 	float LastTemp;
 	float MinGenTemp;
 	float MaxGenTemp;
+	float AverageTemp;
 	bool bHasGeneratedTemp = false;
 
 

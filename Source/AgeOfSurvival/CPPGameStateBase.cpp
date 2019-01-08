@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/KismetTextLibrary.h"
 
 ACPPGameStateBase::ACPPGameStateBase() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -16,6 +17,7 @@ void ACPPGameStateBase::BeginPlay() {
 	//Limits size of array to 3 to stop overflow
 	GameTime.SetNum(3);
 	GameDate.SetNum(3);
+	GameTemp.SetNum(3);
 
 	//Convert int to float for three main time variables
 	Hours = UKismetMathLibrary::Conv_IntToFloat(Hours);
@@ -42,8 +44,9 @@ void ACPPGameStateBase::Tick(float DeltaSeconds) {
 void ACPPGameStateBase::EnvironmentTick() {
 	SeasonEnum = Season(Month);
 	FRotator SunAngle = DayNight();
-	Temp = Temperature();
-	UpdateEnvironment(SunAngle, SeasonEnum, Temp); //Blueprint Function
+	TempFloat = Temperature();
+	TempString = TemperatureString();
+	UpdateEnvironment(SunAngle, SeasonEnum, *TempString); //Blueprint Function
 }
 
 //Sets clockwork for working out game speed.
@@ -155,54 +158,61 @@ float ACPPGameStateBase::Temperature() {
 
 	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
 		if (!bHasGeneratedTemp) {
-			//Sets low and high bounds for each season
-			if (SeasonEnum == ESeasonEnum::EWinter) {
-				MaxGenTemp = 8.0f * TempMultiplier;
-				MinGenTemp = -7.0f * TempMultiplier;
-			}
-			else if (SeasonEnum == ESeasonEnum::ESpring) {
-				MaxGenTemp = 12.0f * TempMultiplier;
-				MinGenTemp = 2.0f * TempMultiplier;
-			}
-			else if (SeasonEnum == ESeasonEnum::ESummer) {
-				MaxGenTemp = 20.0f * TempMultiplier;
-				MinGenTemp = 7.0f * TempMultiplier;
-			}
-			else if (SeasonEnum == ESeasonEnum::EAutumn) {
-				MaxGenTemp = 13.0f * TempMultiplier;
-				MinGenTemp = -3.0f * TempMultiplier;
-			}
-			else {
-				//Error logging
-				UE_LOG(LogTemp, Error, TEXT("Temperature::Check for season failed!"));
+			for (int i = 0; i < 3; i++) { //Iterations for getting an average
+				//Sets low and high bounds for each season
+				if (SeasonEnum == ESeasonEnum::EWinter) {
+					MaxGenTemp = 8.0f * TempMultiplier;
+					MinGenTemp = -7.0f * TempMultiplier;
+				}
+				else if (SeasonEnum == ESeasonEnum::ESpring) {
+					MaxGenTemp = 12.0f * TempMultiplier;
+					MinGenTemp = 2.0f * TempMultiplier;
+				}
+				else if (SeasonEnum == ESeasonEnum::ESummer) {
+					MaxGenTemp = 20.0f * TempMultiplier;
+					MinGenTemp = 7.0f * TempMultiplier;
+				}
+				else if (SeasonEnum == ESeasonEnum::EAutumn) {
+					MaxGenTemp = 13.0f * TempMultiplier;
+					MinGenTemp = -3.0f * TempMultiplier;
+				}
+				else {
+					//Error logging
+					UE_LOG(LogTemp, Error, TEXT("Temperature::Check for season failed!"));
+				}
+
+				//Generate base temperature
+				GeneratedTemp = FMath::RandRange(MinGenTemp, MaxGenTemp);
+
+				//Makes sure temperature between last and current is not too far apart.
+				if ((GeneratedTemp - LastTemp) > 4) {
+					GeneratedTemp = LastTemp + FMath::RandRange(2.0f, 3.5f);
+				}
+				else if ((LastTemp - GeneratedTemp) > 4) {
+					GeneratedTemp = LastTemp - FMath::RandRange(0.0f, 2.5f);
+				}
+
+				//Gradual increase towards midday
+				if (GameTime[2] <= 13 && GameTime[2] > 1) {
+					GeneratedTemp = GeneratedTemp + FMath::RandRange(1.5f, 3.0f);
+				}
+				//Gradual decrease towards midnight
+				else if (GameTime[2] > 13 && GameTime[2] < 24) {
+					GeneratedTemp = GeneratedTemp - FMath::RandRange(0.2f, 1.5f);
+				}
+				GameTemp.Insert(GeneratedTemp, i);
 			}
 
-			//Generate base temperature
-			GeneratedTemp = FMath::RandRange(MinGenTemp, MaxGenTemp);
+			//Calculating Mean
+			AverageTemp = (GameTemp[0] + GameTemp[1] + GameTemp[2]) / 3;
 
-			//Makes sure temperature between last and current is not too far apart.
-			if ((GeneratedTemp - LastTemp) > 4) {
-				GeneratedTemp = LastTemp + FMath::RandRange(2.0f, 3.5f);
-			}
-			else if ((LastTemp - GeneratedTemp) > 4) {
-				GeneratedTemp = LastTemp - FMath::RandRange(0.0f, 2.5f);
+			LastTemp = AverageTemp;
+
+			if (bIsTempFahrenheit) {
+				AverageTemp = (AverageTemp * (9 / 5)) + 32;
 			}
 
-			//Gradual increase towards midday
-			if (GameTime[2] <= 13 && GameTime[2] > 1) {
-				GeneratedTemp = GeneratedTemp + FMath::RandRange(1.5f, 3.0f);
-			}
-			//Gradual decrease towards midnight
-			else if (GameTime[2] > 13 && GameTime[2] < 24) {
-				GeneratedTemp = GeneratedTemp - FMath::RandRange(0.2f, 1.5f);
-			}
 
-			//Floors result to 1 decimal place
-			float FlooredTemp = GeneratedTemp * 10;
-			FlooredTemp = FGenericPlatformMath::FloorToFloat(FlooredTemp);
-			GeneratedTemp = FlooredTemp / 10;
-
-			LastTemp = GeneratedTemp;
 			bHasGeneratedTemp = true; //Makes sure generation only happens once
 		}
 	}
@@ -210,5 +220,28 @@ float ACPPGameStateBase::Temperature() {
 		bHasGeneratedTemp = false; //Resets the variable for the next hour
 	}
 
-	return GeneratedTemp; //Returns generated temp
+	return AverageTemp; //Returns generated temp
+}
+//Function to return string version of temperature for display.
+FString ACPPGameStateBase::TemperatureString() {
+	FString StringTemp = FString::SanitizeFloat(TempFloat);
+
+	int32 DecimalPos = UKismetStringLibrary::FindSubstring(StringTemp, ".", false, false, 0);
+	FString DecimalString = UKismetStringLibrary::GetSubstring(StringTemp, DecimalPos, 2);
+	FString NumberString = UKismetStringLibrary::LeftChop(StringTemp, StringTemp.Len() - DecimalPos);
+
+	//UE_LOG(LogTemp, Warning, TEXT("Temp: %f"), TempFloat);
+	//UE_LOG(LogTemp, Warning, TEXT("Temp: %s%s"), *NumberString, *DecimalString);
+
+	FString FinalString = NumberString.Append(DecimalString);
+
+	if (bIsTempFahrenheit) {
+		FinalString.Append(TEXT("°F"));
+	}
+	else {
+		FinalString.Append(TEXT("°C"));
+	}
+	return FinalString;
+
+	//TODO create functionality for less accurate reading of temperatures during primitive age.
 }
