@@ -52,13 +52,18 @@ public:
 
 	//Update function for blueprint (visual stuff, e.g. sun position)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
-	void UpdateEnvironment
-	(
-		FRotator SunAngle, 
-		ESeasonEnum Season, 
+		void UpdateEnvironment
+		(
+		FRotator SunAngle,
+		ESeasonEnum Season,
 		const FString& Temperature,
-		const FString& Wind, 
-		const FString& WindAngle
+		const FString& Wind,
+		const FString& WindAngle,
+		float SunBrightness,
+		float CloudSpeed,
+		float CloudOpacity,
+		float StarOpacity
+
 	);
 
 	//Currently selected season
@@ -79,6 +84,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float WindAngleFloat;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float sunBrightness;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float cloudSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float cloudOpacity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float starOpacity;
+
+
 	//Variables for display to the user.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	FString TempString;
@@ -88,6 +107,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	FString WindAngleString;
+
 
 	//Multipliers for base generated temp/wind.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
@@ -128,8 +148,12 @@ private:
 	float Temperature();
 	float Wind();
 	float WindAngle();
+	float SunBrightness();
+	float CloudOpacity();
+	float StarOpacity();
+	
 
-	//Environment Variables
+	//DayNight
 	float DayNightHours = 0;
 
 	//Temperature
@@ -157,4 +181,6 @@ private:
 	float AverageWindAngle;
 	bool bHasGeneratedWindAngle = false;
 	bool bNewGenerationWindAngle = true;
+
+
 };

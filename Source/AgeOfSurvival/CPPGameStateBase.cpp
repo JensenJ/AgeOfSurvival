@@ -59,7 +59,12 @@ void ACPPGameStateBase::EnvironmentTick() {
 	WindString = FloatToDisplay(WindFloat, ESuffixEnum::ENone, false);
 	WindAngleString = FloatToDisplay(WindAngleFloat, ESuffixEnum::EDirection, false);
 
-	UpdateEnvironment(SunAngle, SeasonEnum, *TempString, *WindString, *WindAngleString); //Blueprint Function
+	sunBrightness = SunBrightness();
+	cloudSpeed = WindFloat;
+	cloudOpacity = CloudOpacity();
+	starOpacity = StarOpacity();
+
+	UpdateEnvironment(SunAngle, SeasonEnum, *TempString, *WindString, *WindAngleString, sunBrightness, cloudSpeed, cloudOpacity, starOpacity); //Blueprint Function
 }
 
 //Sets clockwork for working out game speed.
@@ -330,6 +335,31 @@ float ACPPGameStateBase::WindAngle() {
 	}
 
 	return AverageWindAngle; //Returns generated wind
+}
+
+float ACPPGameStateBase::SunBrightness() {
+	float brightness = 10.0f;
+	if (SeasonEnum == ESeasonEnum::ESpring) {
+		brightness *= 0.8;
+	}
+	else if (SeasonEnum == ESeasonEnum::ESummer) {
+		brightness *= 1.2;
+	}
+	else if (SeasonEnum == ESeasonEnum::EAutumn) {
+		brightness *= 0.7;
+	}
+	else if (SeasonEnum == ESeasonEnum::EWinter) {
+		brightness *= 0.5;
+	}
+	return brightness;
+}
+
+float ACPPGameStateBase::CloudOpacity() {
+	return 1.0f;
+}
+
+float ACPPGameStateBase::StarOpacity() {
+	return 2.0f - cloudOpacity;
 }
 
 FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal) {
