@@ -18,6 +18,8 @@ void ACPPGameStateBase::BeginPlay() {
 	GameTime.SetNum(3);
 	GameDate.SetNum(3);
 	GameTemp.SetNum(3);
+	GameWind.SetNum(3);
+	GameWindAngle.SetNum(3);
 
 	//Convert int to float for three main time variables
 	Hours = UKismetMathLibrary::Conv_IntToFloat(Hours);
@@ -44,9 +46,20 @@ void ACPPGameStateBase::Tick(float DeltaSeconds) {
 void ACPPGameStateBase::EnvironmentTick() {
 	SeasonEnum = Season(Month);
 	FRotator SunAngle = DayNight();
+	WindFloat = Wind();
+	WindAngleFloat = WindAngle();
 	TempFloat = Temperature();
-	TempString = TemperatureString();
-	UpdateEnvironment(SunAngle, SeasonEnum, *TempString); //Blueprint Function
+	if (bIsTempFahrenheit) {
+		TempString = FloatToDisplay(TempFloat, ESuffixEnum::EFahrenheit, true);
+	}
+	else {
+		TempString = FloatToDisplay(TempFloat, ESuffixEnum::ECelsius, true);
+	}
+
+	WindString = FloatToDisplay(WindFloat, ESuffixEnum::ENone, false);
+	WindAngleString = FloatToDisplay(WindAngleFloat, ESuffixEnum::EDirection, false);
+
+	UpdateEnvironment(SunAngle, SeasonEnum, *TempString, *WindString, *WindAngleString); //Blueprint Function
 }
 
 //Sets clockwork for working out game speed.
@@ -138,6 +151,7 @@ ESeasonEnum ACPPGameStateBase::Season(int32 Month) {
 		return ESeasonEnum::ENone;
 	}
 }
+
 //Calculates SunAngle and returns to environment tick
 FRotator ACPPGameStateBase::DayNight() {
 	float SunAngle = ((DayNightHours / 6) * 90) + 90;
@@ -155,12 +169,15 @@ FRotator ACPPGameStateBase::DayNight() {
 }
 //Generates temperature for this hour.
 float ACPPGameStateBase::Temperature() {
-
-	//TODO Add functionality for wind to affect temperature.
+	if (bNewGenerationTemp) {
+		LastTemp = FMath::RandRange(0.0f, 7.0f);
+		bNewGenerationTemp = false;
+	}
 
 	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
 		if (!bHasGeneratedTemp) {
 			for (int i = 0; i < 3; i++) { //Iterations for getting an average
+
 				//Sets low and high bounds for each season
 				if (SeasonEnum == ESeasonEnum::EWinter) {
 					MaxGenTemp = 8.0f * TempMultiplier;
@@ -208,13 +225,16 @@ float ACPPGameStateBase::Temperature() {
 			//Calculating Mean Temperature
 			AverageTemp = (GameTemp[0] + GameTemp[1] + GameTemp[2]) / 3;
 
-			LastTemp = AverageTemp; //Setting last temp for next hour.
+			AverageTemp = AverageTemp - WindFloat;
 
+			if (AverageTemp < -273.0f) {
+				AverageTemp = -273.0f;
+			}
+			LastTemp = AverageTemp; //Setting last temp for next hour.
 			//Converting celsius to fahrenheit if user has option enabled.
 			if (bIsTempFahrenheit) {
 				AverageTemp = (AverageTemp * (9 / 5)) + 32;
 			}
-
 
 			bHasGeneratedTemp = true; //Makes sure generation only happens once
 		}
@@ -226,32 +246,155 @@ float ACPPGameStateBase::Temperature() {
 	return AverageTemp; //Returns generated temp
 }
 //Function to return string version of temperature for display.
-FString ACPPGameStateBase::TemperatureString() {
+
+float ACPPGameStateBase::Wind() {
+	if (bNewGenerationWind) {
+		LastWind = FMath::RandRange(0.0f, 7.0f);
+		bNewGenerationWind = false;
+	}
+
+	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
+		if (!bHasGeneratedWind) {
+			for (int i = 0; i < 3; i++) { //Iterations for getting an average
+				//Generate base wind
+				GeneratedWind = FMath::RandRange(-3.0f, 3.0f);
+
+				//Makes sure wind speed between last and current is not too far apart.
+				if ((GeneratedWind - LastWind) > 3) {
+					GeneratedWind = LastWind + FMath::RandRange(0.0f, 3.0f);
+				}
+				else if ((LastWind - GeneratedWind) < 3) {
+					GeneratedWind = LastWind - FMath::RandRange(0.0f, 3.0f);
+				}
+
+				GameWind.Insert(GeneratedWind, i);
+			}
+
+			//Calculating Mean Wind
+			AverageWind = (GameWind[0] + GameWind[1] + GameWind[2]) / 3;
+
+			if (AverageWind > 2.5f) {
+				AverageWind = AverageWind - FMath::RandRange(0.3f, 0.9f);
+			}
+			else if (AverageWind < 0) {
+				AverageWind = FMath::RandRange(0.3f, 1.3f);
+			}
+
+			LastWind = AverageWind;
+			bHasGeneratedWind = true; //Makes sure generation only happens once
+		}
+	}
+	else {
+		bHasGeneratedWind = false; //Resets the variable for the next hour
+	}
+
+	return AverageWind; //Returns generated wind
+}
+
+float ACPPGameStateBase::WindAngle() {
+	if (bNewGenerationWindAngle) {
+		LastWindAngle = FMath::RandRange(0.0f, 360.0f);
+		bNewGenerationWindAngle = false;
+	}
+
+	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
+		if (!bHasGeneratedWindAngle) {
+			for (int i = 0; i < 3; i++) { //Iterations for getting an average
+				GeneratedWindAngle = FMath::RandRange(0.0f, 360.0f);
+
+				//Makes sure wind angle between last and current is no too far apart.
+				if ((GeneratedWindAngle - LastWindAngle) > 15) {
+					GeneratedWindAngle = LastWindAngle + FMath::RandRange(0.0f, 10.0f);
+				}
+				else if ((LastWindAngle - GeneratedWindAngle) < 15) {
+					GeneratedWindAngle = LastWindAngle - FMath::RandRange(0.0f, 10.0f);
+				}
+				GameWindAngle.Insert(GeneratedWindAngle, i);
+			}
+
+			//Calculating Mean Wind
+			AverageWindAngle = (GameWindAngle[0] + GameWindAngle[1] + GameWindAngle[2]) / 3;
+
+			if (AverageWindAngle < 0) {
+				AverageWindAngle = 340 - AverageWindAngle;
+			}
+			else if (AverageWindAngle > 360) {
+				AverageWindAngle = AverageWindAngle - 340;
+			}
+			LastWindAngle = AverageWindAngle;
+			bHasGeneratedWindAngle = true; //Makes sure generation only happens once
+		}
+	}
+	else {
+		bHasGeneratedWindAngle = false; //Resets the variable for the next hour
+	}
+
+	return AverageWindAngle; //Returns generated wind
+}
+
+FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal) {
 	//Converts float to string
-	FString StringTemp = FString::SanitizeFloat(TempFloat);
+	FString String = FString::SanitizeFloat(Value);
 
 	//Finds decimal point index
-	int32 DecimalPos = UKismetStringLibrary::FindSubstring(StringTemp, ".", false, false, 0);
+	int32 DecimalPos = UKismetStringLibrary::FindSubstring(String, ".", false, false, 0);
 	//Gets all numbers after decimal
-	FString DecimalString = UKismetStringLibrary::GetSubstring(StringTemp, DecimalPos, 2);
+	FString DecimalString = UKismetStringLibrary::GetSubstring(String, DecimalPos, 2);
 	//Gets everything before decimal
-	FString NumberString = UKismetStringLibrary::LeftChop(StringTemp, StringTemp.Len() - DecimalPos);
+	FString NumberString = UKismetStringLibrary::LeftChop(String, String.Len() - DecimalPos);
 
 	//UE_LOG(LogTemp, Warning, TEXT("Temp: %f"), TempFloat);
 	//UE_LOG(LogTemp, Warning, TEXT("Temp: %s%s"), *NumberString, *DecimalString);
 
 	//Merges before and after decimal together
-	FString FinalString = NumberString.Append(DecimalString);
-
-	//Adds temperature unit
-	if (bIsTempFahrenheit) {
-		FinalString.Append(TEXT("°F"));
+	FString FinalString;
+	if (bIncludeDecimal) {
+		FinalString = NumberString.Append(DecimalString);
 	}
 	else {
-		FinalString.Append(TEXT("°C"));
+		FinalString = NumberString;
 	}
 
-	return FinalString; //Returns string out of function.
+	//Adds suffix
+	if (Suffix == ESuffixEnum::ECelsius) {
+		FinalString = FinalString.Append("C");
+	}
+	else if (Suffix == ESuffixEnum::EFahrenheit) {
+		FinalString = FinalString.Append("F");
+	}
+	//else if (Suffix == ESuffixEnum::EDegrees) {
+	//	FinalString = FinalString.Append("°");
+	//}
+	else if (Suffix == ESuffixEnum::EDirection) {
 
-	//TODO create functionality for less accurate reading of temperatures during primitive age.
+		//Appends direction to end of angle based on value. 
+		if (Value < 0 || Value > 360) {
+			UE_LOG(LogTemp, Error, TEXT("FloatToDisplay::Value is %f, when only values 0 - 360 are valid."), Value)
+		}
+		else if (Value < 335 && Value > 291) {
+			FinalString = FinalString.Append(" (NW)");
+		}
+		else if (Value < 290 && Value > 246) {
+			FinalString = FinalString.Append(" (W) ");
+		}
+		else if (Value < 245 && Value > 201) {
+			FinalString = FinalString.Append(" (SW)");
+		}
+		else if (Value < 200 && Value > 156) {
+			FinalString = FinalString.Append(" (S) ");
+		}
+		else if (Value < 155 && Value > 111) {
+			FinalString = FinalString.Append(" (SE)");
+		}
+		else if (Value < 110 && Value > 66) {
+			FinalString = FinalString.Append(" (E) ");
+		}
+		else if (Value < 65 && Value > 26) {
+			FinalString = FinalString.Append(" (NE)");
+		}
+		else {
+			FinalString = FinalString.Append(" (N) ");
+		}
+	}
+	return FinalString; //Returns string out of function.
 }

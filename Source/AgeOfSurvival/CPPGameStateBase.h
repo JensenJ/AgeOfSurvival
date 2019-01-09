@@ -18,6 +18,15 @@ enum class ESeasonEnum : uint8 {
 	EWinter		UMETA(DisplayName = "Winter")
 };
 
+UENUM(BlueprintType)
+enum class ESuffixEnum : uint8 {
+	ENone		UMETA(DisplayName = "None"),
+	ECelsius	UMETA(DisplayName = "Celsius"),
+	EFahrenheit	UMETA(DisplayName = "Fahrenheit"),
+	//EDegrees	UMETA(DisplayName = "Degrees"),
+	EDirection	UMETA(DisplayName = "Direction")
+};
+
 UCLASS()
 class AGEOFSURVIVAL_API ACPPGameStateBase : public AGameStateBase
 {
@@ -43,7 +52,14 @@ public:
 
 	//Update function for blueprint (visual stuff, e.g. sun position)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
-	void UpdateEnvironment(FRotator SunAngle, ESeasonEnum Season, const FString& Temperature);
+	void UpdateEnvironment
+	(
+		FRotator SunAngle, 
+		ESeasonEnum Season, 
+		const FString& Temperature,
+		const FString& Wind, 
+		const FString& WindAngle
+	);
 
 	//Currently selected season
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
@@ -53,23 +69,32 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	bool bIsTempFahrenheit;
 
-	//Temperature variable for calculations.
+	//Variables for calculations.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float TempFloat;
 
-	//Temperature variable for display to the user.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float WindFloat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float WindAngleFloat;
+
+	//Variables for display to the user.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	FString TempString;
 
-	//Temperature multiplier for base generated temp, lower is colder, higher is hotter.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	FString WindString;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	FString WindAngleString;
+
+	//Multipliers for base generated temp/wind.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float TempMultiplier = 1.0f;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resources")
-	//int32 Currency
-
-	//UPROPERTY(BlueprintCallable, Category = "Resources")
-	//int32 ChangeCurrency(int32 amount);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	float WindMultiplier = 1.0f;
 
 protected:
 	//Base functions
@@ -77,6 +102,9 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
+	//Converts float to string with 1 dp.
+	FString FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal);
+
 	// Clock Functions
 	void SetClockwork(float DeltaSeconds);
 	void Clock();
@@ -98,7 +126,8 @@ private:
 	ESeasonEnum Season(int32 Month);
 	FRotator DayNight();
 	float Temperature();
-	FString TemperatureString();
+	float Wind();
+	float WindAngle();
 
 	//Environment Variables
 	float DayNightHours = 0;
@@ -111,6 +140,21 @@ private:
 	float MaxGenTemp;
 	float AverageTemp;
 	bool bHasGeneratedTemp = false;
+	bool bNewGenerationTemp = true; 
 
+	//Wind
+	TArray<float> GameWind;
+	float GeneratedWind;
+	float LastWind;
+	float AverageWind;
+	bool bHasGeneratedWind = false;
+	bool bNewGenerationWind = true;
 
+	//Wind Angle
+	TArray<float> GameWindAngle;
+	float GeneratedWindAngle;
+	float LastWindAngle;
+	float AverageWindAngle;
+	bool bHasGeneratedWindAngle = false;
+	bool bNewGenerationWindAngle = true;
 };
