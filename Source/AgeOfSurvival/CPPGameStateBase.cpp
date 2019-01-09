@@ -169,10 +169,15 @@ FRotator ACPPGameStateBase::DayNight() {
 }
 //Generates temperature for this hour.
 float ACPPGameStateBase::Temperature() {
+	if (bNewGenerationTemp) {
+		LastTemp = FMath::RandRange(0.0f, 7.0f);
+		bNewGenerationTemp = false;
+	}
 
 	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
 		if (!bHasGeneratedTemp) {
 			for (int i = 0; i < 3; i++) { //Iterations for getting an average
+
 				//Sets low and high bounds for each season
 				if (SeasonEnum == ESeasonEnum::EWinter) {
 					MaxGenTemp = 8.0f * TempMultiplier;
@@ -220,15 +225,12 @@ float ACPPGameStateBase::Temperature() {
 			//Calculating Mean Temperature
 			AverageTemp = (GameTemp[0] + GameTemp[1] + GameTemp[2]) / 3;
 
-			AverageTemp = AverageTemp - WindFloat / 10;
+			AverageTemp = AverageTemp - WindFloat;
 
 			if (AverageTemp < -273.0f) {
 				AverageTemp = -273.0f;
 			}
-
 			LastTemp = AverageTemp; //Setting last temp for next hour.
-
-
 			//Converting celsius to fahrenheit if user has option enabled.
 			if (bIsTempFahrenheit) {
 				AverageTemp = (AverageTemp * (9 / 5)) + 32;
@@ -244,6 +246,92 @@ float ACPPGameStateBase::Temperature() {
 	return AverageTemp; //Returns generated temp
 }
 //Function to return string version of temperature for display.
+
+float ACPPGameStateBase::Wind() {
+	if (bNewGenerationWind) {
+		LastWind = FMath::RandRange(0.0f, 7.0f);
+		bNewGenerationWind = false;
+	}
+
+	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
+		if (!bHasGeneratedWind) {
+			for (int i = 0; i < 3; i++) { //Iterations for getting an average
+				//Generate base wind
+				GeneratedWind = FMath::RandRange(-3.0f, 3.0f);
+
+				//Makes sure wind speed between last and current is not too far apart.
+				if ((GeneratedWind - LastWind) > 3) {
+					GeneratedWind = LastWind + FMath::RandRange(0.0f, 3.0f);
+				}
+				else if ((LastWind - GeneratedWind) < 3) {
+					GeneratedWind = LastWind - FMath::RandRange(0.0f, 3.0f);
+				}
+
+				GameWind.Insert(GeneratedWind, i);
+			}
+
+			//Calculating Mean Wind
+			AverageWind = (GameWind[0] + GameWind[1] + GameWind[2]) / 3;
+
+			if (AverageWind > 2.5f) {
+				AverageWind = AverageWind - FMath::RandRange(0.3f, 0.9f);
+			}
+			else if (AverageWind < 0) {
+				AverageWind = FMath::RandRange(0.3f, 1.3f);
+			}
+
+			LastWind = AverageWind;
+			bHasGeneratedWind = true; //Makes sure generation only happens once
+		}
+	}
+	else {
+		bHasGeneratedWind = false; //Resets the variable for the next hour
+	}
+
+	return AverageWind; //Returns generated wind
+}
+
+float ACPPGameStateBase::WindAngle() {
+	if (bNewGenerationWindAngle) {
+		LastWindAngle = FMath::RandRange(0.0f, 360.0f);
+		bNewGenerationWindAngle = false;
+	}
+
+	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
+		if (!bHasGeneratedWindAngle) {
+			for (int i = 0; i < 3; i++) { //Iterations for getting an average
+				GeneratedWindAngle = FMath::RandRange(0.0f, 360.0f);
+
+				//Makes sure wind angle between last and current is no too far apart.
+				if ((GeneratedWindAngle - LastWindAngle) > 15) {
+					GeneratedWindAngle = LastWindAngle + FMath::RandRange(0.0f, 10.0f);
+				}
+				else if ((LastWindAngle - GeneratedWindAngle) < 15) {
+					GeneratedWindAngle = LastWindAngle - FMath::RandRange(0.0f, 10.0f);
+				}
+				GameWindAngle.Insert(GeneratedWindAngle, i);
+			}
+
+			//Calculating Mean Wind
+			AverageWindAngle = (GameWindAngle[0] + GameWindAngle[1] + GameWindAngle[2]) / 3;
+
+			if (AverageWindAngle < 0) {
+				AverageWindAngle = 340 - AverageWindAngle;
+			}
+			else if (AverageWindAngle > 360) {
+				AverageWindAngle = AverageWindAngle - 340;
+			}
+			LastWindAngle = AverageWindAngle;
+			bHasGeneratedWindAngle = true; //Makes sure generation only happens once
+		}
+	}
+	else {
+		bHasGeneratedWindAngle = false; //Resets the variable for the next hour
+	}
+
+	return AverageWindAngle; //Returns generated wind
+}
+
 FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal) {
 	//Converts float to string
 	FString String = FString::SanitizeFloat(Value);
@@ -272,15 +360,14 @@ FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool 
 		FinalString = FinalString.Append("C");
 	}
 	else if (Suffix == ESuffixEnum::EFahrenheit) {
-		FinalString = FinalString.Append("­F");
+		FinalString = FinalString.Append("F");
 	}
 	//else if (Suffix == ESuffixEnum::EDegrees) {
 	//	FinalString = FinalString.Append("°");
 	//}
 	else if (Suffix == ESuffixEnum::EDirection) {
 
-		//Appends direction to end of angle based on value.
-		 
+		//Appends direction to end of angle based on value. 
 		if (Value < 0 || Value > 360) {
 			UE_LOG(LogTemp, Error, TEXT("FloatToDisplay::Value is %f, when only values 0 - 360 are valid."), Value)
 		}
@@ -310,75 +397,4 @@ FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool 
 		}
 	}
 	return FinalString; //Returns string out of function.
-}
-
-float ACPPGameStateBase::Wind() {
-	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
-		if (!bHasGeneratedWind) {
-			for (int i = 0; i < 3; i++) { //Iterations for getting an average
-				//Generate base wind
-				GeneratedWind = FMath::RandRange(-3.0f, 3.0f);
-
-				//Makes sure wind speed between last and current is not too far apart.
-				if ((GeneratedWind - LastWind) > 3) {
-					GeneratedWind = LastWind + FMath::RandRange(0.0f, 3.0f);
-				}
-				else if ((LastWind - GeneratedWind) < 3) {
-					GeneratedWind = LastWind - FMath::RandRange(0.0f, 3.0f);
-				}
-
-				GameWind.Insert(GeneratedWind, i);
-			}
-
-			//Calculating Mean Wind
-			AverageWind = (GameWind[0] + GameWind[1] + GameWind[2]) / 3;
-
-			if (AverageWind > 2.5f) {
-				AverageWind = AverageWind - FMath::RandRange(0.3f, 0.9f);
-			}
-			else if (AverageWind < 0) {
-				AverageWind = FMath::RandRange(0.3f, 1.3f);
-			}
-
-			AverageWind = AverageWind * 10;
-
-			LastWind = AverageWind;
-			bHasGeneratedWind = true; //Makes sure generation only happens once
-		}
-	}
-	else {
-		bHasGeneratedWind = false; //Resets the variable for the next hour
-	}
-
-	return AverageWind; //Returns generated wind
-}
-
-float ACPPGameStateBase::WindAngle() {
-	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
-		if (!bHasGeneratedWindAngle) {
-			for (int i = 0; i < 3; i++) { //Iterations for getting an average
-				GeneratedWindAngle = FMath::RandRange(0.0f, 360.0f);
-
-				//Makes sure wind angle between last and current is no too far apart.
-				if ((GeneratedWindAngle - LastWindAngle) > 15) {
-					GeneratedWindAngle = LastWindAngle + FMath::RandRange(0.0f, 10.0f);
-				}
-				else if ((LastWindAngle - GeneratedWindAngle) < 15) {
-					GeneratedWindAngle = LastWindAngle - FMath::RandRange(0.0f, 10.0f);
-				}
-				GameWindAngle.Insert(GeneratedWindAngle, i);
-			}
-
-			//Calculating Mean Wind
-			AverageWindAngle = (GameWindAngle[0] + GameWindAngle[1] + GameWindAngle[2]) / 3;
-
-			LastWindAngle = AverageWindAngle;
-			bHasGeneratedWindAngle = true; //Makes sure generation only happens once
-		}
-	}
-	else {
-		bHasGeneratedWindAngle = false; //Resets the variable for the next hour
-	}
-
-	return AverageWindAngle; //Returns generated wind
 }

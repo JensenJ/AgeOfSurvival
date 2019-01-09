@@ -140,6 +140,7 @@ private:
 	float MaxGenTemp;
 	float AverageTemp;
 	bool bHasGeneratedTemp = false;
+	bool bNewGenerationTemp = true; 
 
 	//Wind
 	TArray<float> GameWind;
@@ -147,6 +148,7 @@ private:
 	float LastWind;
 	float AverageWind;
 	bool bHasGeneratedWind = false;
+	bool bNewGenerationWind = true;
 
 	//Wind Angle
 	TArray<float> GameWindAngle;
@@ -154,4 +156,5 @@ private:
 	float LastWindAngle;
 	float AverageWindAngle;
 	bool bHasGeneratedWindAngle = false;
+	bool bNewGenerationWindAngle = true;
 };
