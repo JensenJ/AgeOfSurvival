@@ -40,9 +40,6 @@ public:
 	TArray<int32> GameTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	TArray<int32> GameDate;
-	//Game speed multiplier 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
-	float GameSpeedMultiplier = 1.0f;
 
 	//Environment
 
@@ -52,19 +49,7 @@ public:
 
 	//Update function for blueprint (visual stuff, e.g. sun position)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Calendar")
-		void UpdateEnvironment
-		(
-		FRotator SunAngle,
-		ESeasonEnum Season,
-		const FString& Temperature,
-		const FString& Wind,
-		const FString& WindAngle,
-		float SunBrightness,
-		float CloudSpeed,
-		float CloudOpacity,
-		float StarOpacity
-
-	);
+	void UpdateEnvironment();
 
 	//Currently selected season
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
@@ -77,13 +62,16 @@ public:
 	//Variables for calculations.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float TempFloat;
-
+	//Wind
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float WindFloat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float WindAngleFloat;
 
+	//Celestial
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	FRotator SunAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float sunBrightness;
@@ -109,7 +97,10 @@ public:
 	FString WindAngleString;
 
 
-	//Multipliers for base generated temp/wind.
+	//Multipliers.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
+	float GameSpeedMultiplier = 1.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float TempMultiplier = 1.0f;
 
@@ -123,7 +114,7 @@ protected:
 
 private:
 	//Converts float to string with 1 dp.
-	FString FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal);
+	FString FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal, int32 Precision);
 
 	// Clock Functions
 	void SetClockwork(float DeltaSeconds);

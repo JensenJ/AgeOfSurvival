@@ -45,26 +45,26 @@ void ACPPGameStateBase::Tick(float DeltaSeconds) {
 //Ticks through and updates functions related to environment
 void ACPPGameStateBase::EnvironmentTick() {
 	SeasonEnum = Season(Month);
-	FRotator SunAngle = DayNight();
+	SunAngle = DayNight();
 	WindFloat = Wind();
 	WindAngleFloat = WindAngle();
 	TempFloat = Temperature();
 	if (bIsTempFahrenheit) {
-		TempString = FloatToDisplay(TempFloat, ESuffixEnum::EFahrenheit, true);
+		TempString = FloatToDisplay(TempFloat, ESuffixEnum::EFahrenheit, true, 1);
 	}
 	else {
-		TempString = FloatToDisplay(TempFloat, ESuffixEnum::ECelsius, true);
+		TempString = FloatToDisplay(TempFloat, ESuffixEnum::ECelsius, true, 1);
 	}
 
-	WindString = FloatToDisplay(WindFloat, ESuffixEnum::ENone, false);
-	WindAngleString = FloatToDisplay(WindAngleFloat, ESuffixEnum::EDirection, false);
+	WindString = FloatToDisplay(WindFloat, ESuffixEnum::ENone, false, 0);
+	WindAngleString = FloatToDisplay(WindAngleFloat, ESuffixEnum::EDirection, false, 0);
 
 	sunBrightness = SunBrightness();
 	cloudSpeed = WindFloat;
 	cloudOpacity = CloudOpacity();
 	starOpacity = StarOpacity();
 
-	UpdateEnvironment(SunAngle, SeasonEnum, *TempString, *WindString, *WindAngleString, sunBrightness, cloudSpeed, cloudOpacity, starOpacity); //Blueprint Function
+	UpdateEnvironment(); //Blueprint Function
 }
 
 //Sets clockwork for working out game speed.
@@ -362,14 +362,14 @@ float ACPPGameStateBase::StarOpacity() {
 	return 2.0f - cloudOpacity;
 }
 
-FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal) {
+FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal, int32 Precision) {
 	//Converts float to string
 	FString String = FString::SanitizeFloat(Value);
 
 	//Finds decimal point index
 	int32 DecimalPos = UKismetStringLibrary::FindSubstring(String, ".", false, false, 0);
 	//Gets all numbers after decimal
-	FString DecimalString = UKismetStringLibrary::GetSubstring(String, DecimalPos, 2);
+	FString DecimalString = UKismetStringLibrary::GetSubstring(String, DecimalPos, 1 + Precision);
 	//Gets everything before decimal
 	FString NumberString = UKismetStringLibrary::LeftChop(String, String.Len() - DecimalPos);
 
