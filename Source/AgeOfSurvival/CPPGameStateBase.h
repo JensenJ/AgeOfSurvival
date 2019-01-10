@@ -27,6 +27,18 @@ enum class ESuffixEnum : uint8 {
 	EDirection	UMETA(DisplayName = "Direction")
 };
 
+UENUM(BlueprintType)
+enum class EWeatherEnum : uint8 {
+	ENone		UMETA(DisplayName = "None"),
+	ESunny		UMETA(DisplayName = "Sunny"),
+	EOvercast	UMETA(DisplayName = "Overcast"),
+	ECloudy		UMETA(DisplayName = "Cloudy"),
+	ERain		UMETA(DisplayName = "Rain"),
+	ESnow		UMETA(DisplayName = "Snow"),
+	EThunder	UMETA(DisplayName = "Thunderstorm"),
+	EFog		UMETA(DisplayName = "Fog")
+};
+
 UCLASS()
 class AGEOFSURVIVAL_API ACPPGameStateBase : public AGameStateBase
 {
@@ -85,6 +97,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float starOpacity;
 
+	//Weather
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	EWeatherEnum WeatherEnum;
 
 	//Variables for display to the user.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
@@ -96,7 +111,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	FString WindAngleString;
 
-
 	//Multipliers.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	float GameSpeedMultiplier = 1.0f;
@@ -107,6 +121,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float WindMultiplier = 1.0f;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+
+	//Skybox Colours for different weathers
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+	FLinearColor ZenithColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+	FLinearColor HorizonColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+	FLinearColor CloudColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+	FLinearColor OverallColor;
+	
 protected:
 	//Base functions
 	virtual void BeginPlay() override;
@@ -142,6 +171,8 @@ private:
 	float SunBrightness();
 	float CloudOpacity();
 	float StarOpacity();
+	EWeatherEnum Weather();
+	void SkyboxColour();
 	
 
 	//DayNight
@@ -173,5 +204,14 @@ private:
 	bool bHasGeneratedWindAngle = false;
 	bool bNewGenerationWindAngle = true;
 
+	//Weather
+	TArray<EWeatherEnum> LastWeather;
+	EWeatherEnum weather;
+	int32 WeatherInt;
+	int32 Counter = 0;
+	bool bHasGeneratedWeather = false;
+	bool bNewGenerationWeather = true;
+	bool bIsSnowEnabled = false;
 
+	
 };
