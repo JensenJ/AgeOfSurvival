@@ -20,6 +20,7 @@ void ACPPGameStateBase::BeginPlay() {
 	GameTemp.SetNum(3);
 	GameWind.SetNum(3);
 	GameWindAngle.SetNum(3);
+	LastWeather.SetNum(24);
 
 	//Convert int to float for three main time variables
 	Hours = UKismetMathLibrary::Conv_IntToFloat(Hours);
@@ -33,6 +34,11 @@ void ACPPGameStateBase::BeginPlay() {
 	GameDate.Insert(Day, 0);
 	GameDate.Insert(Month, 1);
 	GameDate.Insert(Year, 2);
+
+	for (int i = 0; i < 24; i++) {
+		LastWeather.Insert(Weather(), i);
+	}
+	bNewGenerationWeather = false;
 }
 
 //Ticks through and updates functions
@@ -63,6 +69,8 @@ void ACPPGameStateBase::EnvironmentTick() {
 	cloudSpeed = WindFloat;
 	cloudOpacity = CloudOpacity();
 	starOpacity = StarOpacity();
+
+	WeatherEnum = Weather();
 
 	UpdateEnvironment(); //Blueprint Function
 }
@@ -230,7 +238,7 @@ float ACPPGameStateBase::Temperature() {
 			//Calculating Mean Temperature
 			AverageTemp = (GameTemp[0] + GameTemp[1] + GameTemp[2]) / 3;
 
-			AverageTemp = AverageTemp - WindFloat;
+			AverageTemp = AverageTemp - WindFloat / 5;
 
 			if (AverageTemp < -273.0f) {
 				AverageTemp = -273.0f;
@@ -250,7 +258,6 @@ float ACPPGameStateBase::Temperature() {
 
 	return AverageTemp; //Returns generated temp
 }
-//Function to return string version of temperature for display.
 
 float ACPPGameStateBase::Wind() {
 	if (bNewGenerationWind) {
@@ -284,6 +291,8 @@ float ACPPGameStateBase::Wind() {
 			else if (AverageWind < 0) {
 				AverageWind = FMath::RandRange(0.3f, 1.3f);
 			}
+
+			AverageWind = AverageWind * 10;
 
 			LastWind = AverageWind;
 			bHasGeneratedWind = true; //Makes sure generation only happens once
@@ -360,6 +369,120 @@ float ACPPGameStateBase::CloudOpacity() {
 
 float ACPPGameStateBase::StarOpacity() {
 	return 2.0f - cloudOpacity;
+}
+
+EWeatherEnum ACPPGameStateBase::Weather() {
+	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
+		if (!bHasGeneratedWeather) {
+
+			int32 GeneratedWeather = FMath::RandRange(1, 20);
+
+			if (SeasonEnum == ESeasonEnum::ESpring) {
+				if (GeneratedWeather <= 6) {
+					weather = EWeatherEnum::ESunny;
+				}
+				else if (GeneratedWeather <= 9 && GeneratedWeather >= 6) {
+					weather = EWeatherEnum::ERain;
+				}
+				else if (GeneratedWeather == 10) {
+					weather = EWeatherEnum::EFog;
+				}
+				else if (GeneratedWeather <= 16 && GeneratedWeather >= 10) {
+					weather = EWeatherEnum::ECloudy;
+				}
+				else if (GeneratedWeather <= 20 && GeneratedWeather >= 16) {
+					weather = EWeatherEnum::EOvercast;
+				}
+				else {
+					weather = EWeatherEnum::ENone;
+				}
+			}
+			else if (SeasonEnum == ESeasonEnum::ESummer) {
+				if (GeneratedWeather <= 9) {
+					weather = EWeatherEnum::ESunny;
+				}
+				else if (GeneratedWeather <= 11 && GeneratedWeather >= 9) {
+					weather = EWeatherEnum::ERain;
+				}
+				else if (GeneratedWeather <= 13 && GeneratedWeather >= 11) {
+					weather = EWeatherEnum::EFog;
+				}
+				else if (GeneratedWeather <= 17 && GeneratedWeather >= 13) {
+					weather = EWeatherEnum::ECloudy;
+				}
+				else if (GeneratedWeather <= 20 && GeneratedWeather >= 17) {
+					weather = EWeatherEnum::EOvercast;
+				}
+				else {
+					weather = EWeatherEnum::ENone;
+				}
+			}
+			else if (SeasonEnum == ESeasonEnum::EAutumn) {
+				if (GeneratedWeather <= 4) {
+					weather = EWeatherEnum::ESunny;
+				}
+				else if (GeneratedWeather <= 9 && GeneratedWeather >= 4) {
+					weather = EWeatherEnum::ERain;
+				}
+				else if (GeneratedWeather <= 11 && GeneratedWeather >= 9) {
+					weather = EWeatherEnum::EFog;
+				}
+				else if (GeneratedWeather <= 16 && GeneratedWeather >= 11) {
+					weather = EWeatherEnum::ECloudy;
+				}
+				else if (GeneratedWeather <= 20 && GeneratedWeather >= 16) {
+					weather = EWeatherEnum::EOvercast;
+				}
+				else {
+					weather = EWeatherEnum::ENone;
+				}
+			}
+			else if (SeasonEnum == ESeasonEnum::EWinter) {
+				if (GeneratedWeather <= 2) {
+					weather = EWeatherEnum::ESunny;
+				}
+				else if (GeneratedWeather <= 8 && GeneratedWeather >= 2) {
+					weather = EWeatherEnum::ERain;
+				}
+				else if (GeneratedWeather <= 10 && GeneratedWeather >= 8) {
+					weather = EWeatherEnum::EFog;
+				}
+				else if (GeneratedWeather <= 14 && GeneratedWeather >= 10) {
+					weather = EWeatherEnum::ECloudy;
+				}
+				else if (GeneratedWeather <= 18 && GeneratedWeather >= 14) {
+					weather = EWeatherEnum::EOvercast;
+				}
+				else if (GeneratedWeather <= 20 && GeneratedWeather >= 18) {
+					weather = EWeatherEnum::ESnow;
+				}
+				else {
+					weather = EWeatherEnum::ENone;
+				}
+			}
+
+			//if (bNewGenerationWeather == false) {
+				//get last weather
+
+				//	bool bIsThunder = FMath::RandBool();
+				//	if (bIsThunder) {
+				//		weather = EWeatherEnum::EThunder;
+				//	}
+				//	else {
+				//		weather = EWeatherEnum::ERain;
+				//	}
+			//	}
+			//}
+
+			LastWeather.Insert(weather, GameTime[2]);
+			
+			bHasGeneratedWeather = true; //Makes sure generation only happens once
+		}
+	}
+	else {
+		bHasGeneratedWeather = false; //Resets the variable for the next hour
+	}
+	return weather;
 }
 
 FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal, int32 Precision) {

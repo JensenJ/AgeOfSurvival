@@ -27,6 +27,18 @@ enum class ESuffixEnum : uint8 {
 	EDirection	UMETA(DisplayName = "Direction")
 };
 
+UENUM(BlueprintType)
+enum class EWeatherEnum : uint8 {
+	ENone		UMETA(DisplayName = "None"),
+	ESunny		UMETA(DisplayName = "Sunny"),
+	EOvercast	UMETA(DisplayName = "Overcast"),
+	ECloudy		UMETA(DisplayName = "Cloudy"),
+	ERain		UMETA(DisplayName = "Rain"),
+	ESnow		UMETA(DisplayName = "Snow"),
+	EThunder	UMETA(DisplayName = "Thunderstorm"),
+	EFog		UMETA(DisplayName = "Fog")
+};
+
 UCLASS()
 class AGEOFSURVIVAL_API ACPPGameStateBase : public AGameStateBase
 {
@@ -85,6 +97,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float starOpacity;
 
+	//Weather
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
+	EWeatherEnum WeatherEnum;
 
 	//Variables for display to the user.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
@@ -95,7 +110,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	FString WindAngleString;
-
 
 	//Multipliers.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
@@ -142,6 +156,7 @@ private:
 	float SunBrightness();
 	float CloudOpacity();
 	float StarOpacity();
+	EWeatherEnum Weather();
 	
 
 	//DayNight
@@ -173,5 +188,9 @@ private:
 	bool bHasGeneratedWindAngle = false;
 	bool bNewGenerationWindAngle = true;
 
-
+	//Weather
+	TArray<EWeatherEnum> LastWeather;
+	EWeatherEnum weather;
+	bool bHasGeneratedWeather = false;
+	bool bNewGenerationWeather = true;
 };
