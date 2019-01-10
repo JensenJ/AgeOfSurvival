@@ -121,6 +121,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment")
 	float WindMultiplier = 1.0f;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+
+	//Skybox Colours for different weathers
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+	FLinearColor ZenithColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+	FLinearColor HorizonColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+	FLinearColor CloudColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skybox")
+	FLinearColor OverallColor;
+	
 protected:
 	//Base functions
 	virtual void BeginPlay() override;
@@ -157,6 +172,7 @@ private:
 	float CloudOpacity();
 	float StarOpacity();
 	EWeatherEnum Weather();
+	void SkyboxColour();
 	
 
 	//DayNight
@@ -191,6 +207,11 @@ private:
 	//Weather
 	TArray<EWeatherEnum> LastWeather;
 	EWeatherEnum weather;
+	int32 WeatherInt;
+	int32 Counter = 0;
 	bool bHasGeneratedWeather = false;
 	bool bNewGenerationWeather = true;
+	bool bIsSnowEnabled = false;
+
+	
 };
