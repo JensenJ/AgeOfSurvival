@@ -258,6 +258,7 @@ float ACPPGameStateBase::Temperature() {
 }
 
 float ACPPGameStateBase::Wind() {
+	float value = 1;
 	if (bNewGenerationWind) {
 		LastWind = FMath::RandRange(0.0f, 7.0f);
 		bNewGenerationWind = false;
@@ -290,17 +291,18 @@ float ACPPGameStateBase::Wind() {
 				AverageWind = FMath::RandRange(0.3f, 1.3f);
 			}
 
-			AverageWind = AverageWind * 10;
+			//AverageWind = AverageWind;
 
 			LastWind = AverageWind;
 			bHasGeneratedWind = true; //Makes sure generation only happens once
+
 		}
 	}
 	else {
 		bHasGeneratedWind = false; //Resets the variable for the next hour
 	}
-
-	return AverageWind; //Returns generated wind
+	value = FMath::Lerp(WindFloat, AverageWind, GameSpeedMultiplier / (60 * 24));
+	return value; //Returns generated wind
 }
 
 float ACPPGameStateBase::WindAngle() {
@@ -362,39 +364,60 @@ float ACPPGameStateBase::SunBrightness() {
 }
 
 float ACPPGameStateBase::CloudOpacity() {
+	float NewValue = 1;
+	float value = 1;
 	if (WeatherEnum == EWeatherEnum::ECloudy) {
-		return 1.75;
+		NewValue = 1.75;
 	}
 	else if (WeatherEnum == EWeatherEnum::ESunny) {
-		return 0.8;
+		NewValue = 0.8;
 	}
 	else if (WeatherEnum == EWeatherEnum::EOvercast) {
-		return 4.0;
+		NewValue = 3.0;
 	}
 	else if (WeatherEnum == EWeatherEnum::ESnow) {
-		return 2.0;
+		NewValue = 2.0;
+	}
+	else if (WeatherEnum == EWeatherEnum::ERain) {
+		NewValue = 3.5;
+	}
+	else if (WeatherEnum == EWeatherEnum::EThunder) {
+		NewValue = 4.0;
 	}
 	else {
-		return 1.0;
+		NewValue = 1.0;
 	}
+
+	value = FMath::Lerp(cloudOpacity, NewValue, GameSpeedMultiplier / (60 * 24));
+	return value;
 }
 
 float ACPPGameStateBase::StarOpacity() {
+	float NewValue = 1;
+	float value = 1;
 	if (WeatherEnum == EWeatherEnum::ECloudy) {
-		return 0.3;
+		NewValue = 0.6;
 	}
 	else if (WeatherEnum == EWeatherEnum::ESunny) {
-		return 1.0;
+		NewValue = 1.0;
 	}
 	else if (WeatherEnum == EWeatherEnum::EOvercast) {
-		return 0.0;
+		NewValue = 0.4;
 	}
 	else if (WeatherEnum == EWeatherEnum::ESnow) {
-		return 0.2;
+		NewValue = 0.2;
+	}
+	else  if(WeatherEnum == EWeatherEnum::ERain){
+		NewValue = 0.2;
+	}
+	else if (WeatherEnum == EWeatherEnum::EThunder) {
+		NewValue = 0.0;
 	}
 	else {
-		return 1.0;
+		NewValue = 1.0;
 	}
+	value = FMath::Lerp(starOpacity, NewValue, GameSpeedMultiplier / (60 * 24));
+	return value;
 }
 
 EWeatherEnum ACPPGameStateBase::Weather() {
