@@ -264,7 +264,10 @@ float ACPPGameStateBase::Wind() {
 		bNewGenerationWind = false;
 	}
 
-	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
+	if ((GameTime[2] == 0 && GameTime[1] == 0) || 
+		(GameTime[2] == 6 && GameTime[1] == 0) || 
+		(GameTime[2] == 12 && GameTime[1] == 0) || 
+		(GameTime[2] == 18 && GameTime[1] == 0)) { //Resets wind every 6th hour when minute is 0 (new hour)
 		if (!bHasGeneratedWind) {
 			for (int i = 0; i < 3; i++) { //Iterations for getting an average
 				//Generate base wind
@@ -600,58 +603,74 @@ EWeatherEnum ACPPGameStateBase::Weather() {
 
 void ACPPGameStateBase::SkyboxColour() {
 
-
+	FLinearColor LocalZenith, LocalHorizon, LocalCloud, LocalOverall;
 	//TODO Lerp between colours and make night impact colours by making them darker
 
 
 	if (WeatherEnum == EWeatherEnum::ECloudy) {
-		ZenithColor = FLinearColor	(0.0f, 0.1f, 0.3f, 1.0f);
-		HorizonColor = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
-		CloudColor = FLinearColor	(0.9f, 0.9f, 1.0f, 1.0f);
-		OverallColor = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
+		LocalZenith = FLinearColor	(0.0f, 0.1f, 0.3f, 1.0f);
+		LocalHorizon = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
+		LocalCloud = FLinearColor	(0.9f, 0.9f, 1.0f, 1.0f);
+		LocalOverall = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else if (WeatherEnum == EWeatherEnum::ESunny) {
-		ZenithColor = FLinearColor	(0.1f, 0.2f, 0.3f, 1.0f);
-		HorizonColor = FLinearColor	(0.45f, 0.5f, 0.75f, 1.0f);
-		CloudColor = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
-		OverallColor = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
+		LocalZenith = FLinearColor	(0.1f, 0.2f, 0.3f, 1.0f);
+		LocalHorizon = FLinearColor	(0.45f, 0.5f, 0.75f, 1.0f);
+		LocalCloud = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
+		LocalOverall = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else if (WeatherEnum == EWeatherEnum::EOvercast) {
-		ZenithColor = FLinearColor	(0.3f, 0.4f, 0.5f, 1.0f);
-		HorizonColor = FLinearColor	(0.1f, 0.3f, 0.4f, 1.0f);
-		CloudColor = FLinearColor	(0.1f, 0.1f, 0.1f, 1.0f);
-		OverallColor = FLinearColor	(0.4f, 0.4f, 0.4f, 1.0f);
+		LocalZenith = FLinearColor	(0.3f, 0.4f, 0.5f, 1.0f);
+		LocalHorizon = FLinearColor	(0.1f, 0.3f, 0.4f, 1.0f);
+		LocalCloud = FLinearColor	(0.1f, 0.1f, 0.1f, 1.0f);
+		LocalOverall = FLinearColor	(0.4f, 0.4f, 0.4f, 1.0f);
 	}
 	else if (WeatherEnum == EWeatherEnum::ESnow) {
-		ZenithColor = FLinearColor	(0.3f, 0.4f, 0.5f, 1.0f);
-		HorizonColor = FLinearColor	(0.1f, 0.3f, 0.4f, 1.0f);
-		CloudColor = FLinearColor	(0.1f, 0.1f, 0.1f, 1.0f);
-		OverallColor = FLinearColor	(0.4f, 0.4f, 0.4f, 1.0f);
+		LocalZenith = FLinearColor	(0.3f, 0.4f, 0.5f, 1.0f);
+		LocalHorizon = FLinearColor	(0.1f, 0.3f, 0.4f, 1.0f);
+		LocalCloud = FLinearColor	(0.1f, 0.1f, 0.1f, 1.0f);
+		LocalOverall = FLinearColor	(0.4f, 0.4f, 0.4f, 1.0f);
 	}
 	else if (WeatherEnum == EWeatherEnum::EFog) {
-		ZenithColor = FLinearColor	(0.0f, 0.1f, 0.3f, 1.0f);
-		HorizonColor = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
-		CloudColor = FLinearColor	(0.9f, 0.9f, 1.0f, 1.0f);
-		OverallColor = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
+		LocalZenith = FLinearColor	(0.0f, 0.1f, 0.3f, 1.0f);
+		LocalHorizon = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
+		LocalCloud = FLinearColor	(0.9f, 0.9f, 1.0f, 1.0f);
+		LocalOverall = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else if (WeatherEnum == EWeatherEnum::ERain) {
-		ZenithColor = FLinearColor	(0.3f, 0.4f, 0.5f, 1.0f);
-		HorizonColor = FLinearColor	(0.0f, 0.2f, 0.3f, 1.0f);
-		CloudColor = FLinearColor	(0.04f, 0.04f, 0.04f, 1.0f);
-		OverallColor = FLinearColor	(0.15f, 0.15f, 0.15f, 1.0f);
+		LocalZenith = FLinearColor	(0.3f, 0.4f, 0.5f, 1.0f);
+		LocalHorizon = FLinearColor	(0.0f, 0.2f, 0.3f, 1.0f);
+		LocalCloud = FLinearColor	(0.04f, 0.04f, 0.04f, 1.0f);
+		LocalOverall = FLinearColor	(0.15f, 0.15f, 0.15f, 1.0f);
 	}
 	else if (WeatherEnum == EWeatherEnum::EThunder) {
-		ZenithColor = FLinearColor	(0.3f, 0.4f, 0.5f, 1.0f);
-		HorizonColor = FLinearColor	(0.0f, 0.2f, 0.3f, 1.0f);
-		CloudColor = FLinearColor	(0.04f, 0.04f, 0.04f, 1.0f);
-		OverallColor = FLinearColor	(0.15f, 0.15f, 0.15f, 1.0f);
+		LocalZenith = FLinearColor	(0.3f, 0.4f, 0.5f, 1.0f);
+		LocalHorizon = FLinearColor	(0.0f, 0.2f, 0.3f, 1.0f);
+		LocalCloud = FLinearColor	(0.04f, 0.04f, 0.04f, 1.0f);
+		LocalOverall = FLinearColor	(0.15f, 0.15f, 0.15f, 1.0f);
 	}
 	else {
-		ZenithColor = FLinearColor	(0.1f, 0.2f, 0.3f, 1.0f);
-		HorizonColor = FLinearColor	(0.0f, 0.6f, 1.0f, 1.0f);
-		CloudColor = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
-		OverallColor = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
+		LocalZenith = FLinearColor	(0.1f, 0.2f, 0.3f, 1.0f);
+		LocalHorizon = FLinearColor	(0.0f, 0.6f, 1.0f, 1.0f);
+		LocalCloud = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
+		LocalOverall = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
 	}
+
+	if (GameTime[2] == 4 || GameTime[2] == 5 || GameTime[2] == 6 ||
+		GameTime[2] == 16 || GameTime[2] == 17 || GameTime[2] == 18) {
+		LocalZenith = FLinearColor(0.6f, 0.1f, 0.0f, 1.0f);
+		LocalHorizon = FLinearColor(1.0f, 0.6f, 0.0f, 1.0f);
+		LocalCloud = FLinearColor(0.3f, 0.2f, 0.0f, 1.0f);
+	}
+	if ((GameTime[2] >= 19 && GameTime[2] <= 23) || (GameTime[2] >= 0 && GameTime[2] <= 3)) {
+		LocalZenith = FLinearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		LocalHorizon = FLinearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		LocalCloud = FLinearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	}
+	ZenithColor = FMath::Lerp(ZenithColor, LocalZenith, GameSpeedMultiplier / (60 * 24));
+	HorizonColor = FMath::Lerp(HorizonColor, LocalHorizon, GameSpeedMultiplier / (60 * 24));
+	CloudColor = FMath::Lerp(CloudColor, LocalCloud, GameSpeedMultiplier / (60 * 24));
+	OverallColor = FMath::Lerp(OverallColor, LocalOverall, GameSpeedMultiplier / (60 * 24));
 }
 
 FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal, int32 Precision) {
