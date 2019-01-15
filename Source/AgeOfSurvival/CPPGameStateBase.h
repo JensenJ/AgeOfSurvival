@@ -24,7 +24,8 @@ enum class ESuffixEnum : uint8 {
 	ECelsius	UMETA(DisplayName = "Celsius"),
 	EFahrenheit	UMETA(DisplayName = "Fahrenheit"),
 	//EDegrees	UMETA(DisplayName = "Degrees"),
-	EDirection	UMETA(DisplayName = "Direction")
+	EDirection	UMETA(DisplayName = "Direction"),
+	EPercent	UMETA(DisplayName = "Percent")
 };
 
 UENUM(BlueprintType)

@@ -1,19 +1,19 @@
-// Copyright Age of Survival 2019.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
-#include "CPPCameraPawn.generated.h"
+#include "GameFramework/Character.h"
+#include "CPPCharacterBase.generated.h"
 
 UCLASS()
-class AGEOFSURVIVAL_API ACPPCameraPawn : public APawn
+class AGEOFSURVIVAL_API ACPPCharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
-	ACPPCameraPawn();
+	// Sets default values for this character's properties
+	ACPPCharacterBase();
 
 protected:
 	// Called when the game starts or when spawned
