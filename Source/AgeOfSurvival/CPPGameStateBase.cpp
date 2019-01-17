@@ -666,6 +666,7 @@ void ACPPGameStateBase::SkyboxColour() {
 		LocalZenith = FLinearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		LocalHorizon = FLinearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		LocalCloud = FLinearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		LocalOverall = FLinearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	}
 	ZenithColor = FMath::Lerp(ZenithColor, LocalZenith, GameSpeedMultiplier / (60 * 24));
 	HorizonColor = FMath::Lerp(HorizonColor, LocalHorizon, GameSpeedMultiplier / (60 * 24));
@@ -706,6 +707,10 @@ FString ACPPGameStateBase::FloatToDisplay(float Value, ESuffixEnum Suffix, bool 
 	//else if (Suffix == ESuffixEnum::EDegrees) {
 	//	FinalString = FinalString.Append("°");
 	//}
+	else if (Suffix == ESuffixEnum::EPercent) {
+		FinalString = FinalString.Append("%");
+	}
+
 	else if (Suffix == ESuffixEnum::EDirection) {
 
 		//Appends direction to end of angle based on value. 
