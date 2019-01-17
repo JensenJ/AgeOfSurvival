@@ -2,66 +2,92 @@
 
 #include "CPPCharacterPlayer.h"
 
+#include "UObject/UObjectGlobals.h"
+#include "Components/SphereComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Components/CapsuleComponent.h"
-#include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SceneComponent.h"
 
-ACPPCharacterPlayer::ACPPCharacterPlayer()
+ACPPCharacterPlayer::ACPPCharacterPlayer(const class FObjectInitializer& ObjectInit)
 {
-	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(42.0f, 96.0f);
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
 
-	// Don't rotate when the controller rotates.
+	///////////////////////////////////////////////////
+	//////////// Camera Component Setup ///////////////
+	///////////////////////////////////////////////////
+
+	// Set controller rotator variables
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+	
+	// Instantiate all components
+	//SceneComponent = ObjectInit.CreateDefaultSubobject<USceneComponent>(this, TEXT("SceneComponent"), false);
+	//SphereComponent = ObjectInit.CreateDefaultSubobject<USphereComponent>(this, TEXT("SphereComponent"), false);
+	SpringArmComponent = ObjectInit.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("SpringArmComponent"), false);
+	CameraComponent = ObjectInit.CreateDefaultSubobject<UCameraComponent>(this, TEXT("CameraComponent"), false);
 
-	// Create a camera boom attached to the root (capsule)
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->bAbsoluteRotation = true; // Rotation of the character should not affect rotation of boom
-	CameraBoom->bDoCollisionTest = false;
-	CameraBoom->TargetArmLength = 500.f;
-	CameraBoom->SocketOffset = FVector(0.f, 0.f, 75.f);
-	CameraBoom->RelativeRotation = FRotator(0.f, 0.f, 0.f);
+	if (!SpringArmComponent) {
+		UE_LOG(LogTemp, Error, TEXT("PECameraPawn: Spring Arm Component not found::PointerProtection"));
+		return;
+	}
+	if (!CameraComponent) {
+		UE_LOG(LogTemp, Error, TEXT("PECameraPawn: Camera Component not found::PointerProtection"));
+		return;
+	}
 
-	// Create a camera and attach to boom
-	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("SideViewCamera"));
-	CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	CameraComponent->bUsePawnControlRotation = false; // We don't want the controller rotating the camera
+	// Setup scene component
+	//SceneComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	//this->SetRootComponent(SceneComponent);
+	//SceneComponent->RelativeLocation = FVector(0.0f, 0.0f, 50.0f);
 
+	// Setup sphere component
+	//SphereComponent->AttachToComponent(SceneComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	//SphereComponent->RelativeLocation = FVector(0.0f, 0.0f, 0.0f);
+	//SphereComponent->RelativeRotation = FRotator(0.0f, 0.0f, 0.0f);
+	//SphereComponent->bHiddenInGame = true;
+
+	// Setup spring arm component
+	SpringArmComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	SpringArmComponent->bAbsoluteRotation = false;
+	SpringArmComponent->TargetArmLength = 500.0f;
+	SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, 0.0f);
+	SpringArmComponent->RelativeRotation = FRotator(0.0, 0.0f, 0.0f);
+
+	// Setup camera component
+	CameraComponent->AttachToComponent(SpringArmComponent, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);
+	CameraComponent->bUsePawnControlRotation = false;
+	CameraComponent->RelativeLocation = FVector(0.0f, 0.0f, 0.0f);
 }
 
-void ACPPCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+// Called when the game starts or when spawned
+void ACPPCharacterPlayer::BeginPlay()
 {
-	// set up gameplay key bindings
-	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACPPCharacterPlayer::Jump);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ACPPCharacterPlayer::MoveRight);
-	PlayerInputComponent->BindAxis("MoveForward", this, &ACPPCharacterPlayer::MoveForward);
-
-	PlayerInputComponent->BindAxis("MouseX", this, &ACPPCharacterPlayer::MouseX);
-	PlayerInputComponent->BindAxis("MouseY", this, &ACPPCharacterPlayer::MouseY);
+	Super::BeginPlay();
+	// Set Rotation of pawn
+	FRotator CamRotation = FRotator(0.0f, 0.0f, 0.0f);
+	SetActorRotation(CamRotation);
 }
 
-void ACPPCharacterPlayer::MoveForward(float Value) {
-	Value *= MovementMultiplier;
-	AddMovementInput(FVector(-1.0f, 0.0f, 0.0f), Value);
+// Called every frame
+void ACPPCharacterPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
 }
 
-void ACPPCharacterPlayer::MoveRight(float Value) {
-	Value *= MovementMultiplier;
-	AddMovementInput(FVector(0.0f, -1.0f, 0.0f), Value);
+// Called to bind functionality to input
+void ACPPCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
 }
 
-void ACPPCharacterPlayer::MouseX(float Value) {
-	Value *= SensitivityMultiplier;
-	UE_LOG(LogTemp, Error, TEXT("Test: %f"), Value)
-	AddControllerYawInput(Value);
+// Getters for all camera components
+USpringArmComponent* ACPPCharacterPlayer::GetSpringArmComponent() {
+	return SpringArmComponent;
 }
-
-void ACPPCharacterPlayer::MouseY(float Value) {
-	Value *= SensitivityMultiplier;
-	AddControllerPitchInput(Value);
+UCameraComponent* ACPPCharacterPlayer::GetCameraComponent() {
+	return CameraComponent;
 }
