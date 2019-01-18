@@ -153,11 +153,11 @@ private:
 
 	// Clock Variables
 	float TimeUnit = 0.25f;
-	float Clockwork = 0.0f;
+	float Clockwork;
 	float DayTick = 0;
 	int32 Seconds = 0;
 	int32 Minutes = 0;
-	int32 Hours = 0;
+	int32 Hours = 8 * 60;
 	int32 Day = 1;
 	int32 Month = 1;
 	int32 Year = 1;
@@ -213,6 +213,4 @@ private:
 	bool bHasGeneratedWeather = false;
 	bool bNewGenerationWeather = true;
 	bool bIsSnowEnabled = false;
-
-	
 };

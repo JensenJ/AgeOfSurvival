@@ -69,7 +69,6 @@ void ACPPGameStateBase::EnvironmentTick() {
 	starOpacity = StarOpacity();
 
 	SkyboxColour();
-
 	UpdateEnvironment(); //Blueprint Function
 }
 
@@ -425,7 +424,28 @@ float ACPPGameStateBase::StarOpacity() {
 
 EWeatherEnum ACPPGameStateBase::Weather() {
 	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
-		if (!bHasGeneratedWeather) {
+		if (bNewGenerationWeather == true) {
+
+			int32 GeneratedWeather = FMath::RandRange(1, 4);
+
+			if (GeneratedWeather == 1) {
+				weather = EWeatherEnum::ESunny;
+			}
+			else if (GeneratedWeather == 2) {
+				weather = EWeatherEnum::ECloudy;
+			}
+			else if (GeneratedWeather == 3) {
+				weather = EWeatherEnum::EOvercast;
+			}
+			else if (GeneratedWeather == 4) {
+				weather = EWeatherEnum::ERain;
+			}
+			else {
+				weather = EWeatherEnum::ENone;
+			}
+			bNewGenerationWeather = false;
+		}
+		else if (!bHasGeneratedWeather) {
 			if (SeasonEnum == ESeasonEnum::ESpring) {
 				bIsSnowEnabled = false;
 			}
@@ -439,27 +459,6 @@ EWeatherEnum ACPPGameStateBase::Weather() {
 				bIsSnowEnabled = true;
 			}
 
-			if (bNewGenerationWeather == true) {
-
-				int32 GeneratedWeather = FMath::RandRange(1, 4);
-
-				if (GeneratedWeather == 1) {
-					weather = EWeatherEnum::ESunny;
-				}
-				else if (GeneratedWeather == 2) {
-					weather = EWeatherEnum::ECloudy;
-				}
-				else if (GeneratedWeather == 3) {
-					weather = EWeatherEnum::EOvercast;
-				}
-				else if (GeneratedWeather == 4) {
-					weather = EWeatherEnum::ERain;
-				}
-				else {
-					weather = EWeatherEnum::ENone;
-				}
-				bNewGenerationWeather = false;
-			}
 			else if (bNewGenerationWeather == false) {
 				if (GameTime[2] == 0) {
 				}
@@ -585,7 +584,6 @@ EWeatherEnum ACPPGameStateBase::Weather() {
 				WeatherEnum = EWeatherEnum::ENone;
 			}
 
-
 			LastWeather.Insert(weather, GameTime[2]);
 			Counter++;
 			if (Counter >= 1) {
@@ -604,8 +602,6 @@ EWeatherEnum ACPPGameStateBase::Weather() {
 void ACPPGameStateBase::SkyboxColour() {
 
 	FLinearColor LocalZenith, LocalHorizon, LocalCloud, LocalOverall;
-	//TODO Lerp between colours and make night impact colours by making them darker
-
 
 	if (WeatherEnum == EWeatherEnum::ECloudy) {
 		LocalZenith = FLinearColor	(0.0f, 0.1f, 0.3f, 1.0f);
@@ -655,18 +651,19 @@ void ACPPGameStateBase::SkyboxColour() {
 		LocalCloud = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
 		LocalOverall = FLinearColor	(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-
+	//if sunrise/sunset
 	if (GameTime[2] == 4 || GameTime[2] == 5 || GameTime[2] == 6 ||
 		GameTime[2] == 16 || GameTime[2] == 17 || GameTime[2] == 18) {
 		LocalZenith = FLinearColor(0.6f, 0.1f, 0.0f, 1.0f);
 		LocalHorizon = FLinearColor(1.0f, 0.6f, 0.0f, 1.0f);
 		LocalCloud = FLinearColor(0.3f, 0.2f, 0.0f, 1.0f);
 	}
+	//if night
 	if ((GameTime[2] >= 19 && GameTime[2] <= 23) || (GameTime[2] >= 0 && GameTime[2] <= 3)) {
 		LocalZenith = FLinearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		LocalHorizon = FLinearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		LocalCloud = FLinearColor(0.2f, 0.2f, 0.2f, 1.0f);
-		LocalOverall = FLinearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		LocalCloud = FLinearColor(0.075f, 0.075f, 0.075f, 1.0f);
+		LocalOverall = FLinearColor(0.05f, 0.05f, 0.05f, 1.0f);
 	}
 	ZenithColor = FMath::Lerp(ZenithColor, LocalZenith, GameSpeedMultiplier / (60 * 24));
 	HorizonColor = FMath::Lerp(HorizonColor, LocalHorizon, GameSpeedMultiplier / (60 * 24));

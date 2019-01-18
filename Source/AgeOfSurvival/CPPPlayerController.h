@@ -19,8 +19,8 @@ public:
 	// Sets default values for this pawn's properties
 	ACPPPlayerController();
 
-	//UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
-	//void CreateNewHud();
+	/** Camera boom positioning the camera behind the character */
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -32,8 +32,8 @@ private:
 	//UPROPERTY(EditAnywhere, Category = Camera)
 	//class USceneComponent* LocalSceneComponent = nullptr;
 
-	//UPROPERTY(EditAnywhere, Category = Camera)
-	//class USphereComponent* LocalSphereComponent = nullptr;
+	UPROPERTY(EditAnywhere, Category = Camera)
+	class USphereComponent* LocalSphereComponent = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = Camera)
 	class USpringArmComponent* LocalSpringArmComponent = nullptr;
@@ -49,31 +49,11 @@ private:
 
 	// Input methods
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent);
-	void InputMoveCameraForward(float value);
-	void InputMoveCameraRight(float value);
-	void InputCameraX(float value);
-	void InputCameraY(float value);
-	void InputZoomIn();
-	void InputZoomOut();
-	void InputResetPan();
-	void InputResetZoom();
 
-	// Camera Calculation Functions
-	float CalculateMovementSpeed();
-	FTransform MovementX(float AxisValue, float MoveSensitivity, float SpeedMultiplier);
-	FTransform MovementY(float AxisValue, float MoveSensitivity, float SpeedMultiplier);
-	FRotator PanX(float AxisValue, float PanSensitiviy);
-	FRotator PanY(float AxisValue, float PanSensitivity);
+	void InputMoveForward(float Value);
+	void InputMoveRight(float Value);
+	void InputTurnAtRate(float Rate);
+	void InputLookUpAtRate(float Rate);
 
-	//Camera Variables
-	bool bCameraMoveable = true;
-	float MovementSpeed = 0.0f;
-	float MovementSpeedMin = 5.0f;
-	float MovementSpeedMax = 20.0f;
-	float FastMoveMultiplier = 1.0f;
-	float PanSensitivity = 5.0f;
-	float ZoomSensitivity = 50.0f;
-	float MinArmDistance = 500.0f;
-	float MaxArmDistance = 2500.0f;
-
+	float MoveSpeedMultiplier = 1.0f;
 };
