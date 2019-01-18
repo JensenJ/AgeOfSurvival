@@ -44,15 +44,31 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseZoomRate = 1.0f;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	float WalkingSpeed = 0.5f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	float RunningSpeed = 1.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	bool bIsWalking = false;
+
 protected:
+	//Movement
 	void InputMoveForward(float Value);
 	void InputMoveRight(float Value);
 	void InputTurnAtRate(float Rate);
 	void InputLookUpAtRate(float Rate);
 
+	//Zoom
 	void InputZoomIn();
 	void InputZoomOut();
 
+	//Walking
+	void ToggleWalk();
+	float BaseMovementRate = 1.0f;
+
+	//Camera
 	float targetLength = 300.0f;
 	float POVSwitch = 50.0f;
 	float MaxZoom = 500.0f;

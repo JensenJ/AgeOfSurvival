@@ -54,6 +54,7 @@ void ACPPCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Playe
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("ZoomIn", IE_Pressed, this, &ACPPCharacterPlayer::InputZoomIn);
 	PlayerInputComponent->BindAction("ZoomOut", IE_Pressed, this, &ACPPCharacterPlayer::InputZoomOut);
+	PlayerInputComponent->BindAction("ToggleWalk", IE_Pressed, this, &ACPPCharacterPlayer::ToggleWalk);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ACPPCharacterPlayer::InputMoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACPPCharacterPlayer::InputMoveRight);
@@ -62,6 +63,17 @@ void ACPPCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Playe
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ACPPCharacterPlayer::InputLookUpAtRate);
 
+}
+
+void ACPPCharacterPlayer::ToggleWalk() {
+	if (bIsWalking) {
+		bIsWalking = false;
+		BaseMovementRate = RunningSpeed;
+	}
+	else {
+		bIsWalking = true;
+		BaseMovementRate = WalkingSpeed;
+	}
 }
 
 void ACPPCharacterPlayer::InputZoomIn() {
@@ -100,6 +112,8 @@ void ACPPCharacterPlayer::InputMoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
+		Value *= BaseMovementRate;
+
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -114,6 +128,8 @@ void ACPPCharacterPlayer::InputMoveRight(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
+		Value *= BaseMovementRate;
+
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);

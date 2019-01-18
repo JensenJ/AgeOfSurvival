@@ -423,7 +423,7 @@ float ACPPGameStateBase::StarOpacity() {
 }
 
 EWeatherEnum ACPPGameStateBase::Weather() {
-	if (GameTime[1] == 1) { //Resets temperature every hour when minute is 0 (new hour)
+	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
 		if (bNewGenerationWeather == true) {
 
 			int32 GeneratedWeather = FMath::RandRange(1, 4);
