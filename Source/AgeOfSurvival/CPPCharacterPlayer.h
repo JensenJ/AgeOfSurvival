@@ -19,24 +19,53 @@ class AGEOFSURVIVAL_API ACPPCharacterPlayer : public ACPPCharacterBase
 {
 	GENERATED_BODY()
 public:
-	// Sets default values for this pawn's properties
-	ACPPCharacterPlayer(const FObjectInitializer& ObjectInit);
 
-	USpringArmComponent* GetSpringArmComponent();
-	UCameraComponent* GetCameraComponent();
+	/** Camera boom positioning the camera behind the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
 
-	UPROPERTY(EditAnywhere, Category = Camera)
-	class USpringArmComponent* SpringArmComponent = nullptr;
+	/** Third Person camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* ThirdPersonCamera;
 
-	UPROPERTY(EditAnywhere, Category = Camera)
-	class UCameraComponent* CameraComponent = nullptr;
+	UFUNCTION(BlueprintImplementableEvent, Category = Camera)
+	void SwitchPOV(bool bIsFirstPerson);
+
+	ACPPCharacterPlayer();
+
+	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float BaseTurnRate = 1.0f;
+
+	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float BaseLookUpRate = 1.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float BaseZoomRate = 1.0f;
+
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	void InputMoveForward(float Value);
+	void InputMoveRight(float Value);
+	void InputTurnAtRate(float Rate);
+	void InputLookUpAtRate(float Rate);
 
-private:
-	// Called to bind functionality to input
+	void InputZoomIn();
+	void InputZoomOut();
+
+	float targetLength = 300.0f;
+	float POVSwitch = 50.0f;
+	float MaxZoom = 500.0f;
+	float MinZoom = 10.0f;
+
+protected:
+	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// End of APawn interface
+
+public:
+	/** Returns CameraBoom subobject **/
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Returns ThirdPersonCamera subobject **/
+	FORCEINLINE class UCameraComponent* GetThirdPersonCamera() const { return ThirdPersonCamera; }
 };
