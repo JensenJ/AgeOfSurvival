@@ -55,6 +55,7 @@ void ACPPCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Playe
 	PlayerInputComponent->BindAction("ZoomIn", IE_Pressed, this, &ACPPCharacterPlayer::InputZoomIn);
 	PlayerInputComponent->BindAction("ZoomOut", IE_Pressed, this, &ACPPCharacterPlayer::InputZoomOut);
 	PlayerInputComponent->BindAction("ToggleWalk", IE_Pressed, this, &ACPPCharacterPlayer::ToggleWalk);
+	PlayerInputComponent->BindAction("ToggleCrouch", IE_Pressed, this, &ACPPCharacterPlayer::ToggleCrouch);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ACPPCharacterPlayer::InputMoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACPPCharacterPlayer::InputMoveRight);
@@ -65,14 +66,40 @@ void ACPPCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Playe
 
 }
 
+void ACPPCharacterPlayer::ToggleCrouch() {
+	if (bIsCrouching) {
+		bIsCrouching = false;
+		if (bIsWalking) {
+			BaseMovementRate = WalkingSpeed;
+		}
+		else {
+			BaseMovementRate = RunningSpeed;
+		}
+	}
+	else if (!bIsCrouching) {
+		bIsCrouching = true;
+		BaseMovementRate = CrouchingSpeed;
+	}
+}
+
 void ACPPCharacterPlayer::ToggleWalk() {
 	if (bIsWalking) {
 		bIsWalking = false;
-		BaseMovementRate = RunningSpeed;
+		if (bIsCrouching) {
+			BaseMovementRate = CrouchingSpeed;
+		}
+		else {
+			BaseMovementRate = RunningSpeed;
+		}
 	}
-	else {
+	else if (!bIsWalking) {
 		bIsWalking = true;
-		BaseMovementRate = WalkingSpeed;
+		if (bIsCrouching) {
+			BaseMovementRate = CrouchingSpeed;
+		}
+		else {
+			BaseMovementRate = WalkingSpeed;
+		}
 	}
 }
 
@@ -82,6 +109,7 @@ void ACPPCharacterPlayer::InputZoomIn() {
 	CameraBoom->TargetArmLength = newLength;
 	targetLength = newLength;
 	if (targetLength < POVSwitch) {
+		bIsFirstPerson = true;
 		SwitchPOV(true);
 	}
 }
@@ -92,6 +120,7 @@ void ACPPCharacterPlayer::InputZoomOut() {
 	CameraBoom->TargetArmLength = newLength;
 	targetLength = newLength;
 	if (targetLength > POVSwitch) {
+		bIsFirstPerson = false;
 		SwitchPOV(false);
 	}
 }
