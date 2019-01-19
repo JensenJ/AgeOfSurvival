@@ -113,7 +113,7 @@ void ACPPGameStateBase::Clock() {
 	FString strHours = FString::FromInt(GameTime[2]);
 	FString HoursMinutesString = UKismetStringLibrary::BuildString_Int(strHours, ":", GameTime[1], "");
 	FString FinalString = UKismetStringLibrary::BuildString_Int(HoursMinutesString, ":", GameTime[0], "");
-	UE_LOG(LogTemp, Warning, TEXT("PEGameStateBase: Time: %s"), *FinalString);
+	UE_LOG(LogTemp, Warning, TEXT("CPPGameStateBase: Time: %s"), *FinalString);
 	UE_LOG(LogTemp, Warning, TEXT("Night: %s"), (bIsNight ? TEXT("True") : TEXT("False")));
 }
 
@@ -139,7 +139,7 @@ void ACPPGameStateBase::Calendar() {
 	FString strDays = FString::FromInt(GameDate[0]);
 	FString DaysMonthString = UKismetStringLibrary::BuildString_Int(strDays, "/", GameDate[1], "");
 	FString FinalString = UKismetStringLibrary::BuildString_Int(DaysMonthString, "/", GameDate[2], "");
-	UE_LOG(LogTemp, Warning, TEXT("PEGameStateBase: Date: %s"), *FinalString);
+	UE_LOG(LogTemp, Warning, TEXT("CPPGameStateBase: Date: %s"), *FinalString);
 }
 
 //Returns the season based on what month it is
@@ -424,107 +424,241 @@ float ACPPGameStateBase::StarOpacity() {
 
 EWeatherEnum ACPPGameStateBase::Weather() {
 	if (GameTime[1] == 0) { //Resets temperature every hour when minute is 0 (new hour)
-		if (bNewGenerationWeather == true) {
+		if (!bHasGeneratedWeather) {
+			if (bNewGenerationWeather == true) {
 
-			int32 GeneratedWeather = FMath::RandRange(1, 4);
+				int32 GeneratedWeather = FMath::RandRange(1, 4);
 
-			if (GeneratedWeather == 1) {
-				weather = EWeatherEnum::ESunny;
+				if (GeneratedWeather == 1) {
+					weather = EWeatherEnum::ESunny;
+				}
+				else if (GeneratedWeather == 2) {
+					weather = EWeatherEnum::ECloudy;
+				}
+				else if (GeneratedWeather == 3) {
+					weather = EWeatherEnum::EOvercast;
+				}
+				else if (GeneratedWeather == 4) {
+					weather = EWeatherEnum::ERain;
+				}
+				else {
+					weather = EWeatherEnum::ENone;
+				}
+				bNewGenerationWeather = false;
 			}
-			else if (GeneratedWeather == 2) {
-				weather = EWeatherEnum::ECloudy;
-			}
-			else if (GeneratedWeather == 3) {
-				weather = EWeatherEnum::EOvercast;
-			}
-			else if (GeneratedWeather == 4) {
-				weather = EWeatherEnum::ERain;
-			}
-			else {
-				weather = EWeatherEnum::ENone;
-			}
-			bNewGenerationWeather = false;
-		}
-		else if (!bHasGeneratedWeather) {
-			if (SeasonEnum == ESeasonEnum::ESpring) {
-				bIsSnowEnabled = false;
-			}
-			else if (SeasonEnum == ESeasonEnum::ESummer) {
-				bIsSnowEnabled = false;
-			}
-			else if (SeasonEnum == ESeasonEnum::EAutumn) {
-				bIsSnowEnabled = false;			
-			}
-			else if (SeasonEnum == ESeasonEnum::EWinter) {
-				bIsSnowEnabled = true;
-			}
-
 			else if (bNewGenerationWeather == false) {
 				if (GameTime[2] == 0) {
 				}
 				else if (LastWeather[GameTime[2] - 1] == EWeatherEnum::ESunny) {
-					int32 Sun = FMath::RandRange(0, 2);
-					if (Sun == 0 || Sun == 1) {
-						weather = EWeatherEnum::ESunny;
+					if (SeasonEnum == ESeasonEnum::ESpring) {
+						int32 Sun = FMath::RandRange(0, 2);
+						if (Sun == 0 || Sun == 1) {
+							weather = EWeatherEnum::ESunny;
+						}
+						else if (Sun == 2) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else {
+						weather = EWeatherEnum::ENone;
+						}
 					}
-					else if (Sun == 2) {
-						weather = EWeatherEnum::ECloudy;
+					else if (SeasonEnum == ESeasonEnum::ESummer) {
+						int32 Sun = FMath::RandRange(0, 4);
+						if (Sun == 0 || Sun == 2 || Sun == 3) {
+							weather = EWeatherEnum::ESunny;
+						}
+						else if (Sun == 4) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
-					else {
-					weather = EWeatherEnum::ENone;
+					else if (SeasonEnum == ESeasonEnum::EAutumn) {
+						int32 Sun = FMath::RandRange(0, 1);
+						if (Sun == 0) {
+							weather = EWeatherEnum::ESunny;
+						}
+						else if (Sun == 1) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
+					}
+					else if (SeasonEnum == ESeasonEnum::EWinter) {
+						int32 Sun = FMath::RandRange(0, 2);
+						if (Sun == 0) {
+							weather = EWeatherEnum::ESunny;
+						}
+						else if (Sun == 1 || Sun == 2) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
 				}
 				else if (LastWeather[GameTime[2] - 1] == EWeatherEnum::ECloudy) {
-					int32 Cloudy = FMath::RandRange(0, 7);
-					if (Cloudy == 0 || Cloudy == 1) {
-						weather = EWeatherEnum::ECloudy;
+					if (SeasonEnum == ESeasonEnum::ESpring) {
+						int32 Cloudy = FMath::RandRange(0, 7);
+						if (Cloudy == 0 || Cloudy == 1) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else if (Cloudy == 2 || Cloudy == 3 || Cloudy == 4) {
+							weather = EWeatherEnum::ESunny;
+						}
+						else if (Cloudy == 5 || Cloudy == 6) {
+							weather = EWeatherEnum::EOvercast;
+						}
+						else if (Cloudy == 7) {
+							weather = EWeatherEnum::EFog;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
-					else if (Cloudy == 2 || Cloudy == 3 || Cloudy == 4) {
-						weather = EWeatherEnum::ESunny;
+					else if (SeasonEnum == ESeasonEnum::ESummer) {
+						int32 Cloudy = FMath::RandRange(0, 7);
+						if (Cloudy == 0 || Cloudy == 1 || Cloudy == 2) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else if (Cloudy == 3 || Cloudy == 4 || Cloudy == 5 || Cloudy == 6) {
+							weather = EWeatherEnum::ESunny;
+						}
+						else if (Cloudy == 7) {
+							weather = EWeatherEnum::EOvercast;
+						}
+						else if (Cloudy == 8) {
+							weather = EWeatherEnum::EFog;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
-					else if (Cloudy == 5 || Cloudy == 6) {
-						weather = EWeatherEnum::EOvercast;
+					else if (SeasonEnum == ESeasonEnum::EAutumn) {
+						int32 Cloudy = FMath::RandRange(0, 9);
+						if (Cloudy == 0 || Cloudy == 1 || Cloudy == 2 || Cloudy == 3 || Cloudy == 4) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else if (Cloudy == 5 || Cloudy == 6) {
+							weather = EWeatherEnum::ESunny;
+						}
+						else if (Cloudy == 7 || Cloudy == 8) {
+							weather = EWeatherEnum::EOvercast;
+						}
+						else if (Cloudy == 9) {
+							weather = EWeatherEnum::EFog;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
-					else if (Cloudy == 7) {
-						weather = EWeatherEnum::EFog;
-					}
-					else {
-						weather = EWeatherEnum::ENone;
+					else if (SeasonEnum == ESeasonEnum::EWinter) {
+						int32 Cloudy = FMath::RandRange(0, 8);
+						if (Cloudy == 0 || Cloudy == 1 || Cloudy == 2 || Cloudy == 3) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else if (Cloudy == 4) {
+							weather = EWeatherEnum::ESunny;
+						}
+						else if (Cloudy == 5 || Cloudy == 6 || Cloudy == 7) {
+							weather = EWeatherEnum::EOvercast;
+						}
+						else if (Cloudy == 8) {
+							weather = EWeatherEnum::EFog;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
 				}
 				else if (LastWeather[GameTime[2] - 1] == EWeatherEnum::EOvercast) {
-					int32 Overcast = FMath::RandRange(0, 7);
-					if (Overcast == 0 || Overcast == 1 || Overcast == 2) {
-						weather = EWeatherEnum::EOvercast;
+					if (SeasonEnum == ESeasonEnum::ESpring) {
+						int32 Overcast = FMath::RandRange(0, 9);
+						if (Overcast == 0 || Overcast == 1 || Overcast == 2) {
+							weather = EWeatherEnum::EOvercast;
+						}
+						else if (Overcast == 3 || Overcast == 4 || Overcast == 5 || Overcast == 6) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else if (Overcast == 7 || Overcast == 8) {
+							weather = EWeatherEnum::ERain;
+						}
+						else if (Overcast == 9) {
+							weather = EWeatherEnum::EThunder;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
-					else if (Overcast == 3 || Overcast == 4) {
-						weather = EWeatherEnum::ECloudy;
+					else if (SeasonEnum == ESeasonEnum::ESummer) {
+						int32 Overcast = FMath::RandRange(0, 5);
+						if (Overcast == 0 || Overcast == 1) {
+							weather = EWeatherEnum::EOvercast;
+						}
+						else if (Overcast == 2 || Overcast == 3 || Overcast == 4) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else if (Overcast == 5) {
+							weather = EWeatherEnum::ERain;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
-					else if (Overcast == 5 || Overcast == 6) {
-						weather = EWeatherEnum::ERain;
+					else if (SeasonEnum == ESeasonEnum::EAutumn) {
+						int32 Overcast = FMath::RandRange(0, 8);
+						if (Overcast == 0 || Overcast == 1 || Overcast == 2) {
+							weather = EWeatherEnum::EOvercast;
+						}
+						else if (Overcast == 3 || Overcast == 4 || Overcast == 5) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else if (Overcast == 6 || Overcast == 7) {
+							weather = EWeatherEnum::ERain;
+						}
+						else if (Overcast == 8) {
+							weather = EWeatherEnum::EThunder;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
-					else if (Overcast == 7 && bIsSnowEnabled) {
-						weather = EWeatherEnum::ESnow;
-					}
-					else if (Overcast == 7) {
-						weather = EWeatherEnum::EThunder;
-					}
-					else {
-						weather = EWeatherEnum::ENone;
+					else if (SeasonEnum == ESeasonEnum::EWinter) {
+						int32 Overcast = FMath::RandRange(0, 9);
+						if (Overcast == 0 || Overcast == 1 || Overcast == 2) {
+							weather = EWeatherEnum::EOvercast;
+						}
+						else if (Overcast == 3 || Overcast == 4) {
+							weather = EWeatherEnum::ECloudy;
+						}
+						else if (Overcast == 5) {
+							weather = EWeatherEnum::ESnow;
+						}
+						else if (Overcast == 6 || Overcast == 7 || Overcast == 8) {
+							weather = EWeatherEnum::ERain;
+						}
+						else if (Overcast == 9) {
+							weather = EWeatherEnum::EThunder;
+						}
+						else {
+							weather = EWeatherEnum::ENone;
+						}
 					}
 				}
 				else if (LastWeather[GameTime[2] - 1] == EWeatherEnum::ERain) {
-					int32 Rain = FMath::RandRange(0, 7);
-					if (Rain == 0 || Rain == 1 || Rain == 2) {
+					int32 Rain = FMath::RandRange(0, 8);
+					if (Rain == 0 || Rain == 1 || Rain == 2 || Rain == 3) {
 						weather = EWeatherEnum::ERain;
 					}
-					else if (Rain == 3 || Rain == 4) {
+					else if (Rain == 4 || Rain == 5 || Rain == 6) {
 						weather = EWeatherEnum::EOvercast;
 					}
-					else if (Rain == 5) {
+					else if (Rain == 7) {
 						weather = EWeatherEnum::EFog;
 					}
-					else if (Rain == 6 || Rain == 7) {
+					else if (Rain == 8) {
 						weather = EWeatherEnum::EThunder;
 					}
 					else {
@@ -662,8 +796,8 @@ void ACPPGameStateBase::SkyboxColour() {
 	if ((GameTime[2] >= 19 && GameTime[2] <= 23) || (GameTime[2] >= 0 && GameTime[2] <= 3)) {
 		LocalZenith = FLinearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		LocalHorizon = FLinearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		LocalCloud = FLinearColor(0.075f, 0.075f, 0.075f, 1.0f);
-		LocalOverall = FLinearColor(0.05f, 0.05f, 0.05f, 1.0f);
+		LocalCloud = FLinearColor(0.04f, 0.04f, 0.04f, 1.0f);
+		LocalOverall = FLinearColor(0.15f, 0.15f, 0.15f, 1.0f);
 	}
 	ZenithColor = FMath::Lerp(ZenithColor, LocalZenith, GameSpeedMultiplier / (60 * 24));
 	HorizonColor = FMath::Lerp(HorizonColor, LocalHorizon, GameSpeedMultiplier / (60 * 24));
