@@ -51,8 +51,16 @@ public:
 	float RunningSpeed = 1.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	float CrouchingSpeed = 0.25f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	bool bIsWalking = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	bool bIsCrouching = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	bool bIsFirstPerson = false;
 protected:
 	//Movement
 	void InputMoveForward(float Value);
@@ -60,13 +68,14 @@ protected:
 	void InputTurnAtRate(float Rate);
 	void InputLookUpAtRate(float Rate);
 
+	float BaseMovementRate = 1.0f;
+	void ToggleWalk();
+	void ToggleCrouch();
+
 	//Zoom
 	void InputZoomIn();
 	void InputZoomOut();
 
-	//Walking
-	void ToggleWalk();
-	float BaseMovementRate = 1.0f;
 
 	//Camera
 	float targetLength = 300.0f;

@@ -212,5 +212,4 @@ private:
 	int32 Counter = 0;
 	bool bHasGeneratedWeather = false;
 	bool bNewGenerationWeather = true;
-	bool bIsSnowEnabled = false;
 };
