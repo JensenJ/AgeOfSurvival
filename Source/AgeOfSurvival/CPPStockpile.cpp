@@ -14,7 +14,15 @@ ACPPStockpile::ACPPStockpile()
 void ACPPStockpile::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (MaterialType == EMaterial::EWood) {
+		MaxMaterialAmount = MaxWoodAmount;
+	}
+	else if (MaterialType == EMaterial::EStone) {
+		MaxMaterialAmount = MaxStoneAmount;
+	}
+	else {
+		MaxMaterialAmount = 8;
+	}
 }
 
 // Called every frame
@@ -24,3 +32,18 @@ void ACPPStockpile::Tick(float DeltaTime)
 
 }
 
+void ACPPStockpile::SetMaterialAmount(int32 amount) {
+	if (amount > MaxMaterialAmount) {
+		UE_LOG(LogTemp, Error, TEXT("Stockpile::More material has been added than the stockpile can support"))
+	}
+	else if (amount < 0) {
+		UE_LOG(LogTemp, Error, TEXT("Stockpile::Tried removing item from stockpile which does not exist"))
+	}
+	else {
+		CurrentMaterialAmount = amount;
+	}
+}
+
+int32 ACPPStockpile::GetMaterialAmount() {
+	return CurrentMaterialAmount;
+}
