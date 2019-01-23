@@ -41,7 +41,9 @@ void ACPPStockpile::SetMaterialAmount(int32 amount) {
 	}
 	else {
 		CurrentMaterialAmount = amount;
+		Refresh();
 	}
+
 }
 
 int32 ACPPStockpile::GetMaterialAmount() {

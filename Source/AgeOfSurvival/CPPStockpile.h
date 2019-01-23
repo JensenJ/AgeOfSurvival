@@ -36,6 +36,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = Stockpile)
 	int32 GetMaterialAmount();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Stockpile)
+	void Refresh();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
