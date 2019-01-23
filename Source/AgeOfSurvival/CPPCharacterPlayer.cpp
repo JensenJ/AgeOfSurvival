@@ -34,6 +34,7 @@ ACPPCharacterPlayer::ACPPCharacterPlayer()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = targetLength; // The camera follows at this distance behind the character	
+	CameraBoom->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a third person camera
@@ -73,9 +74,11 @@ void ACPPCharacterPlayer::ToggleCrouch() {
 		else {
 			BaseMovementRate = RunningSpeed;
 		}
+		CameraBoom->AddRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
 	}
 	else if (!bIsCrouching) {
 		bIsCrouching = true;
+		CameraBoom->AddRelativeLocation(FVector(0.0f, 0.0f, -50.0f));
 		BaseMovementRate = CrouchingSpeed;
 	}
 }
