@@ -4,6 +4,7 @@
 #include "Engine.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "CPPComponentAttributes.h"
 
 // Sets default values
 ACPPCharacterBase::ACPPCharacterBase()
@@ -24,6 +25,7 @@ ACPPCharacterBase::ACPPCharacterBase()
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxFlySpeed = 600.f;
 
+	AttributesComponent = CreateDefaultSubobject<UCPPComponentAttributes>(TEXT("AttributesComponent"));
 }
 
 // Called when the game starts or when spawned

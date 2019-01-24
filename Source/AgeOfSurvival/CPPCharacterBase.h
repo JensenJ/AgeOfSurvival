@@ -15,6 +15,8 @@ public:
 	// Sets default values for this character's properties
 	ACPPCharacterBase();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Attributes)
+	class UCPPComponentAttributes* AttributesComponent;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
