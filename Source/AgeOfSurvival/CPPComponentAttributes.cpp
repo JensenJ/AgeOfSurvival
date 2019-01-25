@@ -31,8 +31,12 @@ void UCPPComponentAttributes::TickComponent(float DeltaTime, ELevelTick TickType
 	// ...
 }
 
-void UCPPComponentAttributes::Damage(int32 amount) {
+void UCPPComponentAttributes::DamageHealth(int32 amount) {
 	if (amount <= 0) { // Makes sure negatives are not entered
+		return;
+	}
+
+	if (bIsInvincibleHealth) {
 		return;
 	}
 
@@ -48,7 +52,7 @@ void UCPPComponentAttributes::Damage(int32 amount) {
 	}
 }
 
-void UCPPComponentAttributes::Heal(int32 amount) {
+void UCPPComponentAttributes::HealHealth(int32 amount) {
 	if (amount <= 0) { // Makes sure negatives are not entered
 		return;
 	}
@@ -71,4 +75,54 @@ void UCPPComponentAttributes::SetMaxHealth(int32 amount) {
 
 int32 UCPPComponentAttributes::GetMaxHealth() {
 	return maxHealth;
+}
+
+void UCPPComponentAttributes::SetInvincibleHealth(bool invincible) {
+	bIsInvincibleHealth = invincible;
+}
+
+void UCPPComponentAttributes::DamageStamina(int32 amount) {
+	if (amount <= 0) { // Makes sure negatives are not entered
+		return;
+	}
+
+	if (bIsInvincibleStamina) {
+		return;
+	}
+
+	if ((stamina - amount) < 0) {
+		stamina = 0;
+	}
+	else {
+		stamina -= amount;
+	}
+}
+
+void UCPPComponentAttributes::HealStamina(int32 amount) {
+	if (amount <= 0) { //Makes sure negatives are not entered
+		return;
+	}
+
+	if ((health + amount) > maxHealth) {
+		health = maxHealth;
+	}
+	else {
+		health += amount;
+	}
+}
+
+int32 UCPPComponentAttributes::GetStamina() {
+	return stamina;
+}
+
+void UCPPComponentAttributes::SetMaxStamina(int32 amount) {
+	maxStamina = amount;
+}
+
+int32 UCPPComponentAttributes::GetMaxStamina() {
+	return maxStamina;
+}
+
+void UCPPComponentAttributes::SetInvincibleStamina(bool invincible) {
+	bIsInvincibleStamina = invincible;
 }
