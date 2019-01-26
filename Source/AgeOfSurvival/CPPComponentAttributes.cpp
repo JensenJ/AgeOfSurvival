@@ -12,13 +12,11 @@ UCPPComponentAttributes::UCPPComponentAttributes()
 	// ...
 }
 
-
 // Called when the game starts
 void UCPPComponentAttributes::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
 	
 }
 
@@ -28,101 +26,195 @@ void UCPPComponentAttributes::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+
 }
 
-void UCPPComponentAttributes::DamageHealth(int32 amount) {
+void UCPPComponentAttributes::DecreaseAttributeValue(int32 amount, EAttributeEnum attribute) {
 	if (amount <= 0) { // Makes sure negatives are not entered
 		return;
 	}
 
-	if (bIsInvincibleHealth) {
-		return;
-	}
+	if (attribute == EAttributeEnum::EHealth) {
+		if (bIsInvincibleHealth) {
+			return;
+		}
 
-	if ((health - amount) < 0) {
-		health = 0;
+		if ((health - amount) < 0) {
+			health = 0;
+		}
+		else {
+			health -= amount;
+		}
+
+		if (health <= 0) {
+			bIsDead = true;
+		}
+	}
+	else if (attribute == EAttributeEnum::EStamina) {
+		if (bIsInvincibleStamina) {
+			return;
+		}
+
+		if ((stamina - amount) < 0) {
+			stamina = 0;
+		}
+		else {
+			stamina -= amount;
+		}
+
+		if (stamina <= 0) {
+			bIsTired = true;
+		}
+	}
+	else if (attribute == EAttributeEnum::EHunger) {
+		if (bIsInvincibleHunger) {
+			return;
+		}
+
+		if ((hunger - amount) < 0) {
+			hunger = 0;
+		}
+		else {
+			hunger -= amount;
+		}
+
+		if (hunger <= 0) {
+			bIsStarving = true;
+		}
+	}
+	else if (attribute == EAttributeEnum::EThirst) {
+		if (bIsInvincibleThirst) {
+			return;
+		}
+
+		if ((thirst - amount) < 0) {
+			thirst = 0;
+		}
+		else {
+			thirst -= amount;
+		}
+		
+		if (thirst <= 0) {
+			bIsDehydrated = true;
+		}
 	}
 	else {
-		health -= amount;
-	}
-
-	if (health <= 0) {
-		bIsDead = true;
+		UE_LOG(LogTemp, Error, TEXT("ComponentAttribute::Attribute not identified."))
 	}
 }
 
-void UCPPComponentAttributes::HealHealth(int32 amount) {
+void UCPPComponentAttributes::IncreaseAttributeValue(int32 amount, EAttributeEnum attribute) {
 	if (amount <= 0) { // Makes sure negatives are not entered
 		return;
 	}
 
-	if ((health + amount) > maxHealth) {
-		health = maxHealth;
+	if (attribute == EAttributeEnum::EHealth) {
+		if ((health + amount) > maxHealth) {
+			health = maxHealth;
+		}
+		else {
+			health += amount;
+		}
+	}
+	else if (attribute == EAttributeEnum::EStamina) {
+		if ((stamina + amount) > maxStamina) {
+			stamina = maxStamina;
+		}
+		else {
+			stamina += amount;
+		}
+	}
+	else if (attribute == EAttributeEnum::EHunger) {
+		if ((hunger + amount) > maxHunger) {
+			hunger = maxHunger;
+		}
+		else {
+			hunger += amount;
+		}
+	}
+	else if (attribute == EAttributeEnum::EThirst) {
+		if ((thirst + amount) > maxThirst) {
+			thirst = maxThirst;
+		}
+		else {
+			thirst += amount;
+		}
 	}
 	else {
-		health += amount;
+		UE_LOG(LogTemp, Error, TEXT("ComponentAttribute::Attribute not identified."))
 	}
 }
 
-int32 UCPPComponentAttributes::GetHealth() {
-	return health;
-}
-
-void UCPPComponentAttributes::SetMaxHealth(int32 amount) {
-	maxHealth = amount;
-}
-
-int32 UCPPComponentAttributes::GetMaxHealth() {
-	return maxHealth;
-}
-
-void UCPPComponentAttributes::SetInvincibleHealth(bool invincible) {
-	bIsInvincibleHealth = invincible;
-}
-
-void UCPPComponentAttributes::DamageStamina(int32 amount) {
-	if (amount <= 0) { // Makes sure negatives are not entered
-		return;
+float UCPPComponentAttributes::GetAttributeValue(EAttributeEnum attribute) {
+	if (attribute == EAttributeEnum::EHealth) {
+		return health;
 	}
-
-	if (bIsInvincibleStamina) {
-		return;
+	else if (attribute == EAttributeEnum::EStamina) {
+		return stamina;
 	}
-
-	if ((stamina - amount) < 0) {
-		stamina = 0;
+	else if (attribute == EAttributeEnum::EHunger) {
+		return hunger;
+	}
+	else if (attribute == EAttributeEnum::EThirst) {
+		return thirst;
 	}
 	else {
-		stamina -= amount;
+		UE_LOG(LogTemp, Error, TEXT("ComponentAttribute::Attribute not identified."))
+		return 0;
 	}
 }
 
-void UCPPComponentAttributes::HealStamina(int32 amount) {
-	if (amount <= 0) { //Makes sure negatives are not entered
-		return;
+void UCPPComponentAttributes::SetMaxAttributeValue(int32 amount, EAttributeEnum attribute) {
+	if (attribute == EAttributeEnum::EHealth) {
+		maxHealth = amount;
 	}
-
-	if ((health + amount) > maxHealth) {
-		health = maxHealth;
+	else if (attribute == EAttributeEnum::EStamina) {
+		maxStamina = amount;
+	}
+	else if (attribute == EAttributeEnum::EHunger) {
+		maxHunger = amount;
+	}
+	else if (attribute == EAttributeEnum::EThirst) {
+		maxThirst = amount;
 	}
 	else {
-		health += amount;
+		UE_LOG(LogTemp, Error, TEXT("ComponentAttribute::Attribute not identified."))
 	}
 }
 
-int32 UCPPComponentAttributes::GetStamina() {
-	return stamina;
+float UCPPComponentAttributes::GetMaxAttributeValue(EAttributeEnum attribute) {
+	if (attribute == EAttributeEnum::EHealth) {
+		return maxHealth;
+	}
+	else if (attribute == EAttributeEnum::EStamina) {
+		return maxStamina;
+	}
+	else if (attribute == EAttributeEnum::EHunger) {
+		return maxHunger;
+	}
+	else if (attribute == EAttributeEnum::EThirst) {
+		return maxThirst;
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("ComponentAttribute::Attribute not identified."))
+		return 0;
+	}
 }
 
-void UCPPComponentAttributes::SetMaxStamina(int32 amount) {
-	maxStamina = amount;
-}
-
-int32 UCPPComponentAttributes::GetMaxStamina() {
-	return maxStamina;
-}
-
-void UCPPComponentAttributes::SetInvincibleStamina(bool invincible) {
-	bIsInvincibleStamina = invincible;
+void UCPPComponentAttributes::SetInvincibleAttribute(bool invincible, EAttributeEnum attribute) {
+	if (attribute == EAttributeEnum::EHealth) {
+		bIsInvincibleHealth = invincible;
+	}
+	else if (attribute == EAttributeEnum::EStamina) {
+		bIsInvincibleStamina = invincible;
+	}
+	else if (attribute == EAttributeEnum::EHunger) {
+		bIsInvincibleHunger = invincible;
+	}
+	else if (attribute == EAttributeEnum::EThirst) {
+		bIsInvincibleThirst = invincible;
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("ComponentAttribute::Attribute not identified."))
+	}
 }
