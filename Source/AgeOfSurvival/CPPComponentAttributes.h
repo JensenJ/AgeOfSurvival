@@ -7,6 +7,14 @@
 #include "CPPComponentAttributes.generated.h"
 
 
+UENUM(BlueprintType)
+enum class EAttributeEnum : uint8 {
+	EHealth		UMETA(DisplayName = "Health"),
+	EStamina	UMETA(DisplayName = "Stamina"),
+	EHunger		UMETA(DisplayName = "Hunger"),
+	EThirst		UMETA(DisplayName = "Thirst")
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class AGEOFSURVIVAL_API UCPPComponentAttributes : public UActorComponent
 {
@@ -18,42 +26,22 @@ public:
 
 	//Health
 	UFUNCTION(BlueprintCallable, Category = Health)
-	void DamageHealth(int32 amount);
+	void DecreaseAttributeValue(int32 amount, EAttributeEnum attribute);
 
 	UFUNCTION(BlueprintCallable, Category = Health)
-	void HealHealth(int32 amount);
+	void IncreaseAttributeValue(int32 amount, EAttributeEnum attribute);
 
 	UFUNCTION(BlueprintPure, Category = Health)
-	int32 GetHealth();
+	float GetAttributeValue(EAttributeEnum attribute);
 
 	UFUNCTION(BlueprintCallable, Category = Health)
-	void SetMaxHealth(int32 amount);
+	void SetMaxAttributeValue(int32 amount, EAttributeEnum attribute);
 
 	UFUNCTION(BlueprintPure, Category = Health)
-	int32 GetMaxHealth();
+	float GetMaxAttributeValue(EAttributeEnum attribute);
 
 	UFUNCTION(BlueprintCallable, Category = Health)
-	void SetInvincibleHealth(bool invincible);
-
-
-	//Stamina
-	UFUNCTION(BlueprintCallable, Category = Stamina)
-	void DamageStamina(int32 amount);
-
-	UFUNCTION(BlueprintCallable, Category = Stamina)
-	void HealStamina(int32 amount);
-
-	UFUNCTION(BlueprintPure, Category = Stamina)
-	int32 GetStamina();
-
-	UFUNCTION(BlueprintCallable, Category = Stamina)
-	void SetMaxStamina(int32 amount);
-
-	UFUNCTION(BlueprintPure, Category = Stamina)
-	int32 GetMaxStamina();
-
-	UFUNCTION(BlueprintCallable, Category = Stamina)
-	void SetInvincibleStamina(bool invincible);
+	void SetInvincibleAttribute(bool invincible, EAttributeEnum attribute);
 
 protected:
 	// Called when the game starts
@@ -64,13 +52,27 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	//health
 	int32 health = 100;
 	int32 maxHealth = 100;
 	bool bIsDead = false;
 	bool bIsInvincibleHealth = false;
 
+	//stamina
 	int32 stamina = 100;
 	int32 maxStamina = 100;
 	bool bIsTired = false;
 	bool bIsInvincibleStamina = false;
+
+	//hunger
+	int32 hunger = 100;
+	int32 maxHunger = 100;
+	bool bIsStarving = false;
+	bool bIsInvincibleHunger = false;
+
+	//thirst
+	int32 thirst = 100;
+	int32 maxThirst = 100;
+	bool bIsDehydrated = false;
+	bool bIsInvincibleThirst = false;
 };
