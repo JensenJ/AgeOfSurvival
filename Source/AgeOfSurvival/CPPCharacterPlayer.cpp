@@ -74,11 +74,11 @@ void ACPPCharacterPlayer::ToggleCrouch() {
 		else {
 			BaseMovementRate = RunningSpeed;
 		}
-		CameraBoom->AddRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
+		CameraBoom->AddRelativeLocation(FVector(-50.0f, 0.0f, 50.0f));
 	}
 	else if (!bIsCrouching) {
 		bIsCrouching = true;
-		CameraBoom->AddRelativeLocation(FVector(0.0f, 0.0f, -50.0f));
+		CameraBoom->AddRelativeLocation(FVector(50.0f, 0.0f, -50.0f));
 		BaseMovementRate = CrouchingSpeed;
 	}
 }
