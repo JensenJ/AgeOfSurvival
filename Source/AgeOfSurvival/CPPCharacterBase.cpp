@@ -25,7 +25,11 @@ ACPPCharacterBase::ACPPCharacterBase()
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxFlySpeed = 600.f;
 
-	AttributesComponent = CreateDefaultSubobject<UCPPComponentAttributes>(TEXT("AttributesComponent"));
+	//AttributesComponent = CreateDefaultSubobject<UCPPComponentAttributes>(TEXT("AttributesComponent"));
+
+	//if (!AttributesComponent) {
+	//	UE_LOG(LogTemp, Error, TEXT("AttributeComponent not found."))
+	//}
 }
 
 // Called when the game starts or when spawned
@@ -49,3 +53,10 @@ void ACPPCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 }
 
+void ACPPCharacterBase::Die() {
+	bCanMove = false;
+}
+
+//UCPPComponentAttributes* ACPPCharacterBase::GetAttributesComponent() const {
+//	return AttributesComponent;
+//}

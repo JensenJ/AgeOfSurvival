@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CPPComponentAttributes.h"
+#include "CPPCharacterBase.h"
+#include "GameFramework/Actor.h"
 
 // Sets default values for this component's properties
 UCPPComponentAttributes::UCPPComponentAttributes()
@@ -8,8 +10,6 @@ UCPPComponentAttributes::UCPPComponentAttributes()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 // Called when the game starts
@@ -17,7 +17,19 @@ void UCPPComponentAttributes::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	if (!GetOwner()) {
+		UE_LOG(LogTemp, Error, TEXT("PointerPrevention::Owner"))
+		return;
+	}
+
+
+	character = GetOwner();
+	if (!character) {
+		UE_LOG(LogTemp, Error, TEXT("PointerPrevention::Character"))
+		return;
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("NAME: %s"), *character->GetName())
 }
 
 
@@ -30,6 +42,9 @@ void UCPPComponentAttributes::TickComponent(float DeltaTime, ELevelTick TickType
 }
 
 void UCPPComponentAttributes::DecreaseAttributeValue(int32 amount, EAttributeEnum attribute) {
+	if (bIsDead) {
+		return;
+	}
 	if (amount <= 0) { // Makes sure negatives are not entered
 		return;
 	}
@@ -48,6 +63,11 @@ void UCPPComponentAttributes::DecreaseAttributeValue(int32 amount, EAttributeEnu
 
 		if (health <= 0) {
 			bIsDead = true;
+			
+			ACPPCharacterBase* characterBase = dynamic_cast<ACPPCharacterBase*>(character);
+			if (!characterBase) { return; }
+			characterBase->Die();
+			
 		}
 	}
 	else if (attribute == EAttributeEnum::EStamina) {
@@ -63,7 +83,7 @@ void UCPPComponentAttributes::DecreaseAttributeValue(int32 amount, EAttributeEnu
 		}
 
 		if (stamina <= 0) {
-			bIsTired = true;
+			bIsExhausted = true;
 		}
 	}
 	else if (attribute == EAttributeEnum::EHunger) {
@@ -104,6 +124,9 @@ void UCPPComponentAttributes::DecreaseAttributeValue(int32 amount, EAttributeEnu
 }
 
 void UCPPComponentAttributes::IncreaseAttributeValue(int32 amount, EAttributeEnum attribute) {
+	if (bIsDead) {
+		return;
+	}
 	if (amount <= 0) { // Makes sure negatives are not entered
 		return;
 	}
@@ -216,5 +239,24 @@ void UCPPComponentAttributes::SetInvincibleAttribute(bool invincible, EAttribute
 	}
 	else {
 		UE_LOG(LogTemp, Error, TEXT("ComponentAttribute::Attribute not identified."))
+	}
+}
+
+bool UCPPComponentAttributes::GetAttributeFatal(EAttributeEnum attribute) {
+	if (attribute == EAttributeEnum::EHealth) {
+		return bIsDead;
+	}
+	else if (attribute == EAttributeEnum::EStamina) {
+		return bIsExhausted;
+	}
+	else if (attribute == EAttributeEnum::EHunger) {
+		return bIsStarving;
+	}
+	else if (attribute == EAttributeEnum::EThirst) {
+		return bIsDehydrated;
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("ComponentAttribute::Attribute not identified."))
+		return false;
 	}
 }

@@ -25,23 +25,26 @@ public:
 	UCPPComponentAttributes();
 
 	//Health
-	UFUNCTION(BlueprintCallable, Category = Health)
+	UFUNCTION(BlueprintCallable, Category = Attributes)
 	void DecreaseAttributeValue(int32 amount, EAttributeEnum attribute);
 
-	UFUNCTION(BlueprintCallable, Category = Health)
+	UFUNCTION(BlueprintCallable, Category = Attributes)
 	void IncreaseAttributeValue(int32 amount, EAttributeEnum attribute);
 
-	UFUNCTION(BlueprintPure, Category = Health)
+	UFUNCTION(BlueprintPure, Category = Attributes)
 	float GetAttributeValue(EAttributeEnum attribute);
 
-	UFUNCTION(BlueprintCallable, Category = Health)
+	UFUNCTION(BlueprintCallable, Category = Attributes)
 	void SetMaxAttributeValue(int32 amount, EAttributeEnum attribute);
 
-	UFUNCTION(BlueprintPure, Category = Health)
+	UFUNCTION(BlueprintPure, Category = Attributes)
 	float GetMaxAttributeValue(EAttributeEnum attribute);
 
-	UFUNCTION(BlueprintCallable, Category = Health)
+	UFUNCTION(BlueprintCallable, Category = Attributes)
 	void SetInvincibleAttribute(bool invincible, EAttributeEnum attribute);
+
+	UFUNCTION(BlueprintPure, Category = Attributes)
+	bool GetAttributeFatal(EAttributeEnum attribute);
 
 protected:
 	// Called when the game starts
@@ -52,6 +55,8 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	AActor* character = nullptr;
+
 	//health
 	int32 health = 100;
 	int32 maxHealth = 100;
@@ -61,7 +66,7 @@ private:
 	//stamina
 	int32 stamina = 100;
 	int32 maxStamina = 100;
-	bool bIsTired = false;
+	bool bIsExhausted = false;
 	bool bIsInvincibleStamina = false;
 
 	//hunger

@@ -42,6 +42,11 @@ ACPPCharacterPlayer::ACPPCharacterPlayer()
 	ThirdPersonCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	ThirdPersonCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	//AttributesComponent = CreateDefaultSubobject<UCPPComponentAttributes>(TEXT("AttributesComponent"));
+
+	//if (!AttributesComponent) {
+	//	UE_LOG(LogTemp, Error, TEXT("PointerPrevention::AttributesComponent"));
+	//}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -66,6 +71,9 @@ void ACPPCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Playe
 }
 
 void ACPPCharacterPlayer::ToggleCrouch() {
+	if (!bCanMove) {
+		return;
+	}
 	if (bIsCrouching) {
 		bIsCrouching = false;
 		if (bIsWalking) {
@@ -74,16 +82,19 @@ void ACPPCharacterPlayer::ToggleCrouch() {
 		else {
 			BaseMovementRate = RunningSpeed;
 		}
-		CameraBoom->AddRelativeLocation(FVector(-50.0f, 0.0f, 50.0f));
+		CameraBoom->AddRelativeLocation(FVector(-50.0f, 0.0f, 70.0f));
 	}
 	else if (!bIsCrouching) {
 		bIsCrouching = true;
-		CameraBoom->AddRelativeLocation(FVector(50.0f, 0.0f, -50.0f));
+		CameraBoom->AddRelativeLocation(FVector(50.0f, 0.0f, -70.0f));
 		BaseMovementRate = CrouchingSpeed;
 	}
 }
 
 void ACPPCharacterPlayer::ToggleWalk() {
+	if (!bCanMove) {
+		return;
+	}
 	if (bIsWalking) {
 		bIsWalking = false;
 		if (bIsCrouching) {
@@ -104,7 +115,23 @@ void ACPPCharacterPlayer::ToggleWalk() {
 	}
 }
 
+void ACPPCharacterPlayer::Die() {
+	bCanMove = false;
+	bCanCameraMove = false;
+
+	//CameraBoom->bDoCollisionTest = false;
+	CameraBoom->TargetArmLength = 300;
+	if (!bIsCrouching) {
+		CameraBoom->AddRelativeLocation(FVector(50.0f, 0.0f, -70.0f));
+	}
+	SwitchPOV(false);
+	bIsFirstPerson = false;
+}
+
 void ACPPCharacterPlayer::InputZoomIn() {
+	if (!bCanCameraMove) {
+		return;
+	}
 	float newLength = targetLength - (10.0f * BaseZoomRate);
 	newLength = FMath::Clamp(newLength, MinZoom, MaxZoom);
 	CameraBoom->TargetArmLength = newLength;
@@ -116,6 +143,9 @@ void ACPPCharacterPlayer::InputZoomIn() {
 }
 
 void ACPPCharacterPlayer::InputZoomOut() {
+	if (!bCanCameraMove) {
+		return;
+	}
 	float newLength = targetLength + (10.0f * BaseZoomRate);
 	newLength = FMath::Clamp(newLength, MinZoom, MaxZoom);
 	CameraBoom->TargetArmLength = newLength;
@@ -128,18 +158,27 @@ void ACPPCharacterPlayer::InputZoomOut() {
 
 void ACPPCharacterPlayer::InputTurnAtRate(float Rate)
 {
+	if (!bCanMove) {
+		return;
+	}
 	// calculate delta for this frame from the rate information
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
 void ACPPCharacterPlayer::InputLookUpAtRate(float Rate)
 {
+	if (!bCanCameraMove) {
+		return;
+	}
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
 void ACPPCharacterPlayer::InputMoveForward(float Value)
 {
+	if (!bCanMove) {
+		return;
+	}
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		Value *= BaseMovementRate;
@@ -156,6 +195,9 @@ void ACPPCharacterPlayer::InputMoveForward(float Value)
 
 void ACPPCharacterPlayer::InputMoveRight(float Value)
 {
+	if (!bCanMove) {
+		return;
+	}
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		Value *= BaseMovementRate;

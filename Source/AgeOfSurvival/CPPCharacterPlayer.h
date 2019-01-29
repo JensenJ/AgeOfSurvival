@@ -20,6 +20,9 @@ class AGEOFSURVIVAL_API ACPPCharacterPlayer : public ACPPCharacterBase
 	GENERATED_BODY()
 public:
 
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Attributes, meta = (AllowPrivateAccess = "true"))
+	//class UCPPComponentAttributes* AttributesComponent;
+
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -30,6 +33,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Camera)
 	void SwitchPOV(bool bIsFirstPerson);
+
+	void Die() override;
 
 	ACPPCharacterPlayer();
 
@@ -61,6 +66,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	bool bIsFirstPerson = false;
+
 protected:
 	//Movement
 	void InputMoveForward(float Value);
@@ -82,7 +88,8 @@ protected:
 	float POVSwitch = 50.0f;
 	float MaxZoom = 500.0f;
 	float MinZoom = 10.0f;
-
+	bool bCanCameraMove = true;
+	
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
