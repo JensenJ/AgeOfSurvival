@@ -2,11 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine.h"
 #include "GameFramework/GameStateBase.h"
 #include "CPPPlayerController.h"
 #include "CPPGameStateBase.generated.h"
-
 
 //Enum for different seasons.
 UENUM(BlueprintType)
@@ -53,6 +52,8 @@ public:
 	TArray<int32> GameTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Calendar")
 	TArray<int32> GameDate;
+
+	UDataTable* GetItemDB() const;
 
 	//Environment
 
@@ -142,6 +143,9 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	UPROPERTY(EditDefaultsOnly)
+	class UDataTable* ItemDB;
+
 private:
 	//Converts float to string with 1 dp.
 	FString FloatToDisplay(float Value, ESuffixEnum Suffix, bool bIncludeDecimal, int32 Precision);
@@ -167,7 +171,7 @@ private:
 	ESeasonEnum Season(int32 Month);
 	FRotator DayNight();
 	float Temperature();
-	float Wind();
+	float Wind(); 
 	float WindAngle();
 	float SunBrightness();
 	float CloudOpacity();

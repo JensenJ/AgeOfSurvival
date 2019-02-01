@@ -10,6 +10,10 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "CPPInteractable.h"
+#include "CPPInventoryItem.h"
+#include "CPPPlayerController.h"
+
 ACPPCharacterPlayer::ACPPCharacterPlayer()
 {
 	// Set size for collision capsule
@@ -41,12 +45,46 @@ ACPPCharacterPlayer::ACPPCharacterPlayer()
 	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
 	ThirdPersonCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	ThirdPersonCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+}
 
-	//AttributesComponent = CreateDefaultSubobject<UCPPComponentAttributes>(TEXT("AttributesComponent"));
+void ACPPCharacterPlayer::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
 
-	//if (!AttributesComponent) {
-	//	UE_LOG(LogTemp, Error, TEXT("PointerPrevention::AttributesComponent"));
-	//}
+	CheckForInteractables();
+}
+
+void ACPPCharacterPlayer::CheckForInteractables() {
+	FHitResult HitResult;
+
+	FVector StartTrace, EndTrace;
+
+	int32 Range = 500;
+	if (bIsFirstPerson == false) {
+		StartTrace = ThirdPersonCamera->GetComponentLocation();
+		EndTrace = (ThirdPersonCamera->GetForwardVector() * Range) + StartTrace;
+
+	}
+	else {
+
+	}
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	ACPPPlayerController* playerController = Cast<ACPPPlayerController>(GetController());
+
+	if (!playerController) {
+		UE_LOG(LogTemp, Error, TEXT("Character::playerController not found."))
+	}
+	else {
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, QueryParams)) {
+			ACPPInteractable* interactable = Cast<ACPPInteractable>(HitResult.GetActor());
+
+			if (interactable) {
+				playerController->CurrentInteractable = interactable;
+				return;
+			}
+		}
+		playerController->CurrentInteractable = nullptr;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

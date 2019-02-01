@@ -6,6 +6,10 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/InputComponent.h"
 #include "CPPCharacterPlayer.h"
+
+#include "CPPInteractable.h"
+#include "CPPInventoryItem.h"
+
 #include "CPPPlayerController.generated.h"
 
 /**
@@ -19,41 +23,32 @@ public:
 	// Sets default values for this pawn's properties
 	ACPPPlayerController();
 
-	/** Camera boom positioning the camera behind the character */
+	UFUNCTION(BlueprintImplementableEvent)
+	void ReloadInventory();
 
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	int32 GetInventoryWeight();
 
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	bool AddItemToInventoryByID(FName ID);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class ACPPInteractable* CurrentInteractable;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FInventoryItem> Inventory;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 InventoryWeightLimit;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 InventorySlotLimit;
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+
+	void Interact();
 
 private:
-
-	// Camera Components in order of parentage
-	//UPROPERTY(EditAnywhere, Category = Camera)
-	//class USceneComponent* LocalSceneComponent = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = Camera)
-	class USphereComponent* LocalSphereComponent = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = Camera)
-	class USpringArmComponent* LocalSpringArmComponent = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = Camera)
-	class UCameraComponent* LocalCameraComponent = nullptr;
-
-	// Reference to CameraPawn class
-	ACPPCharacterPlayer* PlayerCharacter = nullptr;
-
-	// Function to get controlled pawn
-	ACPPCharacterPlayer* GetControlledPawn() const;
-
 	// Input methods
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent);
 
-	void InputMoveForward(float Value);
-	void InputMoveRight(float Value);
-	void InputTurnAtRate(float Rate);
-	void InputLookUpAtRate(float Rate);
-
-	float MoveSpeedMultiplier = 1.0f;
 };

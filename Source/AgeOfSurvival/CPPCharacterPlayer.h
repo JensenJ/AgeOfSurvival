@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine.h"
 #include "CPPCharacterBase.h"
 #include "GameFramework/Pawn.h"
 #include "Components/SphereComponent.h"
@@ -20,8 +20,7 @@ class AGEOFSURVIVAL_API ACPPCharacterPlayer : public ACPPCharacterBase
 	GENERATED_BODY()
 public:
 
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Attributes, meta = (AllowPrivateAccess = "true"))
-	//class UCPPComponentAttributes* AttributesComponent;
+	virtual void Tick(float DeltaTime) override;
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -91,9 +90,9 @@ protected:
 	bool bCanCameraMove = true;
 	
 protected:
-	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	// End of APawn interface
+	
+	void CheckForInteractables();
 
 public:
 	/** Returns CameraBoom subobject **/
