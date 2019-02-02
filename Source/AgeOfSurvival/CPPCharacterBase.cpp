@@ -54,9 +54,5 @@ void ACPPCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 }
 
 void ACPPCharacterBase::Die() {
-	bCanMove = false;
-}
 
-//UCPPComponentAttributes* ACPPCharacterBase::GetAttributesComponent() const {
-//	return AttributesComponent;
-//}
+}

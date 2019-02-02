@@ -16,9 +16,6 @@ public:
 	// Sets default values for this character's properties
 	ACPPCharacterBase();
 
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Attributes, meta = (AllowPrivateAccess = "true"))
-	//class UCPPComponentAttributes* AttributesComponent;
-
 	UFUNCTION(BlueprintCallable, Category = Attributes)
 	virtual void Die();
 
@@ -35,8 +32,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	bool bCanMove = true;
 };
 
 
